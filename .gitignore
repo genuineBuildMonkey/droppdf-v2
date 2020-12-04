@@ -1,0 +1,57 @@
+# Complied/Cached
+__pycache__/
+*.pyc
+
+# C extensions/system files
+*.so
+lib/
+lib64/
+
+# Settings Environment
+env/
+.env/
+.env
+venv/ 
+env.bak/ 
+venv.bak/ 
+ENV/ 
+
+# JS build and package files
+build/
+dist/
+node_modules
+
+# Packaging
+*egg
+*.egg
+pip-log.txt
+.cache
+*.manifest 
+*.spec 
+wheels/ 
+parts/ 
+sdist/ 
+
+# Logging/ Tests
+*.log
+
+# Admin templates base symbolic link
+django_admin_base
+
+# Other
+.DS_Store
+*.bak 
+
+# User sheet directory
+*/sheets/user/*
+
+# Lock files
+*~.lock*
+
+# Misc static
+/static/
+#
+
+# celery stuff
+_celery_broker/*.json
+celerybeat*
