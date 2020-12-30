@@ -48,10 +48,10 @@ $(document).ready(function(){
     //after upload without typing all that again
     var label_text = $('.label').first().html();
 
-    $( "#progressbar" ).progressbar({
-        value: 0
-    });
-    $( "#progressbar" ).hide();
+    //$( "#progressbar" ).progressbar({
+        //value: 0
+    //});
+    //$( "#progressbar" ).hide();
 
     var options = {
         url: "/upload/",
@@ -189,7 +189,7 @@ $(document).ready(function(){
 
     };
 
-    myDropzone = new Dropzone("div#myId", options);
+    myDropzone = new Dropzone("div#dropzone", options);
 });
 
 function dropUpload() {

@@ -10,14 +10,18 @@
 	margin-left: -49px;
 	margin-top: -23px;
 	top:50%;
-	left:50%;	
+	left:50%
+    /*border-radius: 5px;*/
+    /*min-height: 5px;*/
+    /*min-width: 100%;*/
+    /*background-color: red;*/
 }
 img{
 	position: absolute;
 	margin-left: -85px;
 	margin-top: -100px;
 	top:50%;
-	left:50%;	
+	left:50%
 }
 .label {
     padding-top: 20px;
@@ -41,4 +45,30 @@ img{
   height: 100%;
   width: 100%;
   border: 2px solid #2c2c2c;
+}
+#dropzone p {
+    font-size:15px;
+}
+#dropzone a {
+    color: #5bbc2e;
+}
+#dropzone .label {
+    top: 20%;
+}
+#dropzone img {
+    top: 20%;
+}
+#dropzone .dz-preview {
+    top: 20%;
+}
+#progressbar {
+    top: 20%;
+}
+@media (max-height: 540px) {
+    .label {
+        top: 50%;
+    }
+    img {
+        top: 50%;
+    }
 }
