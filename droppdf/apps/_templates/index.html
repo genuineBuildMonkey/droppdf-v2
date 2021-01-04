@@ -69,6 +69,8 @@
 
 			<img src="{% static '/apps/img/background.png' %}"></img>
 	    </div>
+
+        {% csrf_token %}
 	    
 	</div>
 	
@@ -76,6 +78,9 @@
 
         var CLIENT_ID = '{{ client_id }}'; 
         var API_KEY = '{{ api_key }}'; 
+        var CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value; 
+
+        console.log(CSRF_TOKEN);
 
         var SCOPES = [
         {% for scope in scopes %}

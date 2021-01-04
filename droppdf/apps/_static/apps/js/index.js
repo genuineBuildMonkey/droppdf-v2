@@ -52,9 +52,14 @@ $(document).ready(function(){
         //value: 0
     //});
     //$( "#progressbar" ).hide();
+    //
+    console.log('x', CSRF_TOKEN);
 
     var options = {
         url: "/upload/",
+        headers: {
+        'x-csrftoken': CSRF_TOKEN
+        },
 
         paramName: "file", // The name that will be used to transfer the file
         clickable: false,
