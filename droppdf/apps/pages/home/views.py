@@ -1,5 +1,11 @@
+import random, string
+import re
+
+from sanitize_filename import sanitize
+
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotFound
+from django.core.exceptions import SuspiciousFileOperation 
 
 def save_file(file, path='', extension='pdf'):
     temp = settings.BASE_DIR + settings.STATIC_URL + str(path)
@@ -28,7 +34,6 @@ def save_file(file, path='', extension='pdf'):
     for chunk in file.chunks():
         fd.write(chunk)
     fd.close()
-
 
     if extension == "pdf":
         # get total number of pages 
@@ -74,6 +79,11 @@ def save_file(file, path='', extension='pdf'):
         return filename_noextension + "-" + rand_key + '.epub'
 
 
+def _randomword(length):
+       return ''.join(random.choice(string.ascii_lowercase + string.digits)\
+               for i in range(length))
+
+
 def home(request):
     return render(request, 'index.html', {'request': request})
 
@@ -83,9 +93,23 @@ def upload(request):
     if request.method == 'POST':
         file_ = request.FILES['file']
 
-        print(file_)
+        filename = file_.name
 
-        filename = file_._get_name()
+        if not filename or len(filename) < 3 or not '.' in filename:
+            raise SuspiciousFileOperation('improper file name')
+
+        filename = sanitize(filename)
+
+        temp = filename.split('.')
+        basename = '.'.join(temp[:-1])
+        extension = temp[-1]
+
+        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+
+        print(new_filename)
+
+        #print(content_type)
+        #mimetype = file_.get_mimetype()
 
         #temp = filename.split('.')
         #extension = temp[len(temp) - 1]

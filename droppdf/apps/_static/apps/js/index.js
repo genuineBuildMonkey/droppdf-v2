@@ -53,7 +53,6 @@ $(document).ready(function(){
     //});
     //$( "#progressbar" ).hide();
     //
-    console.log('x', CSRF_TOKEN);
 
     var options = {
         url: "/upload/",
