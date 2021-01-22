@@ -141,6 +141,8 @@ STATICFILES_DIRS = (
     (BASE_DIR / 'apps/_static'),
 )
 
+MIGRATION_MODULES = {'apps': 'apps._migrations'}
+
 # AWS Settings
 AWS_BUCKET = env('AWS_BUCKET')
 AWS_ACCESS_KEY = env('AWS_ACCESS_KEY')

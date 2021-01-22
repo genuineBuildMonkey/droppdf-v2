@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotFound
 from django.core.exceptions import SuspiciousFileOperation 
 
+from apps.utils.api_aws import S3
+
 def save_file(file, path='', extension='pdf'):
     temp = settings.BASE_DIR + settings.STATIC_URL + str(path)
 
