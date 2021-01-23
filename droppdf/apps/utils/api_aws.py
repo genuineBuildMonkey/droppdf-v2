@@ -37,7 +37,7 @@ class S3():
         )
 
 
-    def get_presigned_url(self, file_name, expire=2400): 
+    def get_presigned_url(self, file_name, expire=2400):
         '''generate presigned temp url for resource
             :param str file_name: name of resource
             :param int expire: seconds until temp url expires. 

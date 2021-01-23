@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotFound
 from django.core.exceptions import SuspiciousFileOperation 
 
+from django.conf import settings
+
 from apps.utils.api_aws import S3
 
 def save_file(file, path='', extension='pdf'):
@@ -109,6 +111,16 @@ def upload(request):
         new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
 
         print(new_filename)
+
+        s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+        s3.save_to_bucket(new_filename, file_)
+
+        url = s3.get_presigned_url(name)
+
+        download_url = s3.get_presigned_download_url(name)
+
+        print(download_url)
 
         #print(content_type)
         #mimetype = file_.get_mimetype()
