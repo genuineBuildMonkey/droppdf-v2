@@ -91,85 +91,91 @@ $(document).ready(function(){
 
             });
 
-        this.on("success", function(file, filename_server) {
-            if(type == 'pdf' || type == 'docx' || type == 'doc')
-            {
-                filename = filename_server;
-                check_list = filename.split("-");
-                check = check_list[0];
-                page_num = check_list[1];
-                temp = [];
+        this.on("success", function(file, file_url) {
+        //this.on("success", function(file, url) {
+            //console.log(file, filename_server);
 
-                for(i=2; i<check_list.length; i++)
-                    temp.push(check_list[i]);
+            if(type == 'pdf') {
+                window.location.href = '/pdf/?file=' + file_url;
+            };
 
-                temp = temp.join("-");
+            //if(type == 'pdf' || type == 'docx' || type == 'doc')
+            //{
+                //filename = filename_server;
+                //check_list = filename.split("-");
+                //check = check_list[0];
+                //page_num = check_list[1];
+                //temp = [];
 
-                // start to ocr pdf
-                if(check == "false")
-                {
-                    estimated_time = Math.round( page_num * 8 );
+                //for(i=2; i<check_list.length; i++)
+                    //temp.push(check_list[i]);
+
+                //temp = temp.join("-");
+
+                //// start to ocr pdf
+                //if(check == "false")
+                //{
+                    //estimated_time = Math.round( page_num * 8 );
                 
-                    label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + estimated_time.toString() + ' seconds to complete</div>';
-                    $(".main .label").html("OCRing..." + label);
+                    //label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + estimated_time.toString() + ' seconds to complete</div>';
+                    //$(".main .label").html("OCRing..." + label);
 
-                    $( "#progressbar" ).show();
-                    ocr_progress = setInterval(function(){ 
-                                        if(ocr_progress_status <= estimated_time * 1000)
-                                        {
-                                            remain_time = Math.round((estimated_time * 1000 - ocr_progress_status) / 1000)
-                                            label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + remain_time.toString() + ' seconds to complete</div>';
-                                            $(".main .label").html("OCRing..." + label);
-                                            ocr_progress_status += estimated_time * 10;
-                                            $( "#progressbar" ).progressbar({
-                                                value: ocr_progress_status / (estimated_time * 10)
-                                            });
-                                        }
-                                        else{
-                                            clearInterval(ocr_progress);
-                                        }
-                                    }, estimated_time * 10);
+                    //$( "#progressbar" ).show();
+                    //ocr_progress = setInterval(function(){ 
+                                        //if(ocr_progress_status <= estimated_time * 1000)
+                                        //{
+                                            //remain_time = Math.round((estimated_time * 1000 - ocr_progress_status) / 1000)
+                                            //label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + remain_time.toString() + ' seconds to complete</div>';
+                                            //$(".main .label").html("OCRing..." + label);
+                                            //ocr_progress_status += estimated_time * 10;
+                                            //$( "#progressbar" ).progressbar({
+                                                //value: ocr_progress_status / (estimated_time * 10)
+                                            //});
+                                        //}
+                                        //else{
+                                            //clearInterval(ocr_progress);
+                                        //}
+                                    //}, estimated_time * 10);
 
-                    $.ajax({
-                        type: "GET",
-                        url:  '/ocr/?filename=' + temp,
-                        success: function (data) {
-                            clearInterval(ocr_progress);
-                            ocr_progress_status = 0;
-                            estimated_time = 0;
-                            $( "#progressbar" ).hide();
-                            $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                            window.location.href = 'pdf/' + data + '/';
-                        },
-                        error: function (x, e) {
-                        }
-                    })
-                }
-                else if(check == 'true')
-                {
+                    //$.ajax({
+                        //type: "GET",
+                        //url:  '/ocr/?filename=' + temp,
+                        //success: function (data) {
+                            //clearInterval(ocr_progress);
+                            //ocr_progress_status = 0;
+                            //estimated_time = 0;
+                            //$( "#progressbar" ).hide();
+                            //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
+                            //window.location.href = 'pdf/' + data + '/';
+                        //},
+                        //error: function (x, e) {
+                        //}
+                    //})
+                //}
+                //else if(check == 'true')
+                //{
                 
-                    $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                    window.location.href = 'pdf/' + temp + '/';
-                }
-                else
-                {
-                    alert("This file is not a pdf or corrupted.");
-                    $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>")
-                }
-            }
-            else if (type == "epub") {
-                $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                window.location.href = 'epub/' + filename_server + '/';
-            }
-            else
-            {
-                $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
+                    //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
+                    //window.location.href = 'pdf/' + temp + '/';
+                //}
+                //else
+                //{
+                    //alert("This file is not a pdf or corrupted.");
+                    //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>")
+                //}
+            //}
+            //else if (type == "epub") {
+                //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
+                //window.location.href = 'epub/' + filename_server + '/';
+            //}
+            //else
+            //{
+                //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
                 //var ip = location.host;
                 //window.location.href = "https://via.hypothes.is/http://datapipes.okfnlabs.org/csv/html/?url= http://" + ip + "/static/" + "drop-pdf/" + filename_server;
                 
-                window.location.href = 'csv/' + filename_server + '/';
-            }
-
+                //window.location.href = 'csv/' + filename_server + '/';
+            //}
         });
 
         this.on("removedfile", function(file) {
