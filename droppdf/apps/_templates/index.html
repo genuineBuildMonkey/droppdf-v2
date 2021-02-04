@@ -8,10 +8,11 @@
 	<title>Drag and Drop a document</title>
 	<link rel="stylesheet" type="text/css" href="{% static "/apps/css/index.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "/vendor/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "/vendor/dropzone-5.7.0/dist/min/dropzone.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "/apps/css/dropzone_custom.css" %}" />
 
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-181082912-1"></script>
+
 	<script>
 	  window.dataLayer = window.dataLayer || [];
 	  function gtag(){dataLayer.push(arguments);}
@@ -29,6 +30,7 @@
 
 <body style="background: #2c2c2c;">
 	<div id="progressbar"></div>
+
 	<div class="main" align="center">
 		
 	    <div id="dropzone" class="dropzone_new">
@@ -76,11 +78,9 @@
 	
 	<script>
 
-        var CLIENT_ID = '{{ client_id }}'; 
-        var API_KEY = '{{ api_key }}'; 
-        var CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value; 
-
-        console.log(CSRF_TOKEN);
+        var CLIENT_ID = '{{ client_id }}';
+        var API_KEY = '{{ api_key }}';
+        var CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         var SCOPES = [
         {% for scope in scopes %}

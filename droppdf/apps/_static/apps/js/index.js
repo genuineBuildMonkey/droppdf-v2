@@ -8,7 +8,6 @@ var estimated_time = 0;
 
 var type = "";
 
-
 //Google Drive Authentication
 function handleAuthClick(event) {
     //give notice if auth keys not present
@@ -48,11 +47,13 @@ $(document).ready(function(){
     //after upload without typing all that again
     var label_text = $('.label').first().html();
 
-    //$( "#progressbar" ).progressbar({
+    var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
+
+    //$( "#progressbar").progressbar({
         //value: 0
     //});
-    //$( "#progressbar" ).hide();
-    //
+
+    //$( "#progressbar").hide();
 
     var options = {
         url: "/upload/",
@@ -60,19 +61,52 @@ $(document).ready(function(){
         'x-csrftoken': CSRF_TOKEN
         },
 
-        paramName: "file", // The name that will be used to transfer the file
+        paramName: "file",
+
+        timeout: 120000,
+
         clickable: false,
+
+        uploadprogress: function(file, progress, bytes) {
+            //account for upload from server to cloud
+            var width = progress * .66;
+
+            $('[data-dz-uploadprogress]').css('width', width + '%');
+
+            //there is lag between full upload and complete because of upload 
+            //time from server to cloud. in process.
+            //complete progressbar
+            if (progress >= 100) {
+                $(".main .label").html("<a href='#'>Processing...</a>");
+
+                var intvl = setInterval(function() {
+                    if (width >= 100) {
+                        clearInterval(intvl);
+                        return;
+                    };
+                    width += 1;
+                    $('[data-dz-uploadprogress]').css('width', width + '%');
+                }, 150);
+            };
+        },
+
         accept: function(file, done) {
+            $("#progressbar").show();
+
             fileObj = file;
-            $(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Uploading...</a>")
+            $(".main .label").html("<a href='#'>Uploading...</a>");
             done();
-          },
+        },
+
         init: function() {
             this.on("addedfile", function(file) {
                 var extention = file.name.split(".");
                 extention = extention[extention.length-1];
+                extention = extention.toLowerCase();
             
-                if (extention == 'pdf' || extention == 'docx' || extention == 'xlsx' || extention == 'doc' || extention == 'xls'|| extention == 'csv' || extention == 'epub'){
+                var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
+                
+                if (valid_extensions.includes(extention)) {
                     type = extention
                     if (addedFile == 0) {
                         addedFile = 1;
@@ -81,125 +115,50 @@ $(document).ready(function(){
                         this.removeFile(file);
                     }
                 }
-                else{
-                    setTimeout(function() { 
+                else {
+                    setTimeout(function() {
                         alert('Upload Error: Document format not recognized.');
                         $(".main .label").html(label_text);
-                        }, 700);
+                    }, 700);
+
                     this.removeFile(file);
                 }
-
             });
 
-        this.on("success", function(file, file_url) {
-        //this.on("success", function(file, url) {
-            //console.log(file, filename_server);
+            this.on("success", function(file, file_url) {
+                $('[data-dz-uploadprogress]').css('width', '100%');
 
-            if(type == 'pdf') {
-                window.location.href = '/pdf/?file=' + file_url;
-            };
+                if(type == 'pdf') {
+                    window.location.href = '/pdf/?file=' + file_url;
+                };
+            });
 
-            //if(type == 'pdf' || type == 'docx' || type == 'doc')
-            //{
-                //filename = filename_server;
-                //check_list = filename.split("-");
-                //check = check_list[0];
-                //page_num = check_list[1];
-                //temp = [];
+            this.on("error", function(file, file_url) {
+            });
 
-                //for(i=2; i<check_list.length; i++)
-                    //temp.push(check_list[i]);
-
-                //temp = temp.join("-");
-
-                //// start to ocr pdf
-                //if(check == "false")
-                //{
-                    //estimated_time = Math.round( page_num * 8 );
-                
-                    //label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + estimated_time.toString() + ' seconds to complete</div>';
-                    //$(".main .label").html("OCRing..." + label);
-
-                    //$( "#progressbar" ).show();
-                    //ocr_progress = setInterval(function(){ 
-                                        //if(ocr_progress_status <= estimated_time * 1000)
-                                        //{
-                                            //remain_time = Math.round((estimated_time * 1000 - ocr_progress_status) / 1000)
-                                            //label = '<div style="font-size:18px">' + page_num.toString() + ' pages to OCR, estimate ' + remain_time.toString() + ' seconds to complete</div>';
-                                            //$(".main .label").html("OCRing..." + label);
-                                            //ocr_progress_status += estimated_time * 10;
-                                            //$( "#progressbar" ).progressbar({
-                                                //value: ocr_progress_status / (estimated_time * 10)
-                                            //});
-                                        //}
-                                        //else{
-                                            //clearInterval(ocr_progress);
-                                        //}
-                                    //}, estimated_time * 10);
-
-                    //$.ajax({
-                        //type: "GET",
-                        //url:  '/ocr/?filename=' + temp,
-                        //success: function (data) {
-                            //clearInterval(ocr_progress);
-                            //ocr_progress_status = 0;
-                            //estimated_time = 0;
-                            //$( "#progressbar" ).hide();
-                            //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                            //window.location.href = 'pdf/' + data + '/';
-                        //},
-                        //error: function (x, e) {
-                        //}
-                    //})
-                //}
-                //else if(check == 'true')
-                //{
-                
-                    //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                    //window.location.href = 'pdf/' + temp + '/';
-                //}
-                //else
-                //{
-                    //alert("This file is not a pdf or corrupted.");
-                    //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>")
-                //}
-            //}
-            //else if (type == "epub") {
-                //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                //window.location.href = 'epub/' + filename_server + '/';
-            //}
-            //else
-            //{
-                //$(".main .label").html("<a href='javascript:void(0)' onclick='dropUpload()'>Drop to upload</a>");
-                //var ip = location.host;
-                //window.location.href = "https://via.hypothes.is/http://datapipes.okfnlabs.org/csv/html/?url= http://" + ip + "/static/" + "drop-pdf/" + filename_server;
-                
-                //window.location.href = 'csv/' + filename_server + '/';
-            //}
-        });
-
-        this.on("removedfile", function(file) {
-            if (addedFile == 1) {
-                $.ajax({
-                    type: "GET",
-                    url:  '/drop/?filename=' + filename,
-                    success: function (data) {
-                        addedFile = 0;
-                        fileObj = null;
-                        filename = "";
-                        ocr_progress_status = 0;
-                        estimated_time = 0;
-                    },
-                    error: function (x, e) {
-                    }
-                })
-            }
+            this.on("removedfile", function(file) {
+                if (addedFile == 1) {
+                    $.ajax({
+                        type: "GET",
+                        url:  '/drop/?filename=' + filename,
+                        success: function (data) {
+                            addedFile = 0;
+                            fileObj = null;
+                            filename = "";
+                            ocr_progress_status = 0;
+                            estimated_time = 0;
+                        },
+                        error: function (x, e) {
+                        }
+                    })
+                }
             });
         },
 
     };
 
     myDropzone = new Dropzone("div#dropzone", options);
+
 });
 
 function dropUpload() {
