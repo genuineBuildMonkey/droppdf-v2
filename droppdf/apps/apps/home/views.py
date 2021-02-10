@@ -118,14 +118,14 @@ def upload(request):
 
         s3.save_to_bucket(new_filename, file_)
 
-        url = s3.get_presigned_url(new_filename)
-
-        url = urllib.parse.quote(url)
-
-        return HttpResponse(url)
+        return HttpResponse(new_filename)
 
     return HttpResponseNotAllowed(['POST,'])
 
 
-def pdf(request):
-    return render(request, 'viewer.html')
+def pdf(request, filename):
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    url = s3.get_presigned_url(filename)
+
+    return render(request, 'viewer.html', {'pdf_url': url})

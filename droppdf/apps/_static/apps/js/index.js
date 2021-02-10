@@ -125,11 +125,11 @@ $(document).ready(function(){
                 }
             });
 
-            this.on("success", function(file, file_url) {
+            this.on("success", function(file, filename) {
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
                 if(type == 'pdf') {
-                    window.location.href = '/pdf/?file=' + file_url;
+                    window.location.href = '/pdf/' + filename + '/'
                 };
             });
 
