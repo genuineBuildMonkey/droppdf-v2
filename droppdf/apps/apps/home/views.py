@@ -11,6 +11,8 @@ from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotFoun
 
 from django.core.exceptions import SuspiciousFileOperation, ValidationError
 
+from django_http_exceptions import HTTPExceptions
+
 from django.conf import settings
 
 from apps.utils.api_aws import S3
@@ -119,8 +121,7 @@ def upload(request):
 
         if extension == 'pdf':
             if not _check_pdf_has_text(file_):
-                #return HttpResponse('pdf has no text or is image pdf')
-                raise Http404('pdf has no text')
+                raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
 
         new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)

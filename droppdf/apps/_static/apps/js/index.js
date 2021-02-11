@@ -49,12 +49,6 @@ $(document).ready(function(){
 
     var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
 
-    //$( "#progressbar").progressbar({
-        //value: 0
-    //});
-
-    //$( "#progressbar").hide();
-
     var options = {
         url: "/upload/",
         headers: {
@@ -77,7 +71,8 @@ $(document).ready(function(){
             //time from server to cloud. in process.
             //complete progressbar
             if (progress >= 100) {
-                $(".main .label").html("<a href='#'>Processing...</a>");
+                $('#process-content-text')
+                    .text('Processing...')
 
                 var intvl = setInterval(function() {
                     if (width >= 100) {
@@ -94,7 +89,13 @@ $(document).ready(function(){
             $("#progressbar").show();
 
             fileObj = file;
-            $(".main .label").html("<a href='#'>Uploading...</a>");
+
+            $('#main-content-text').hide();
+
+            $('#process-content-text')
+                .text('Uploading...')
+                .show();
+
             done();
         },
 
@@ -117,8 +118,9 @@ $(document).ready(function(){
                 }
                 else {
                     setTimeout(function() {
-                        alert('Upload Error: Document format not recognized.');
-                        $(".main .label").html(label_text);
+                        //alert('Upload Error: Document format not recognized.');
+                        //$(".main .label").html(label_text);
+
                     }, 700);
 
                     this.removeFile(file);
@@ -142,7 +144,14 @@ $(document).ready(function(){
             });
 
             this.on("error", function(file, error, xhr) {
-                console.log('X', xhr.status);
+
+                /* if 406 "Not Acceptable" pdf has no text */
+                if (xhr.status == 406) {
+                    var html = 'error'; 
+
+                    displayError(html);
+                };
+
             });
 
             this.on("removedfile", function(file) {
@@ -164,6 +173,22 @@ $(document).ready(function(){
             });
         },
 
+    };
+
+    function displayError(html) {
+        $('#upload-error-content')
+            .empty()
+            .html(html);
+    };
+
+    window.closeError = function() {
+        $('#upload-error-content').empty();
+
+        $('#upload-error').hide();
+
+        $('#process-content-text').hide();
+
+        $('#main-content-text').show();
     };
 
     myDropzone = new Dropzone("div#dropzone", options);

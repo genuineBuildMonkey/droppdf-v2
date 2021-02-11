@@ -45,6 +45,13 @@ img{
     color: #E5070E;
     padding: 3px;
 }
+.label i:hover{
+    cursor: pointer;
+}
+.label #process-content-text {
+    display: none;
+    color: #5bbc2e;
+}
 .dz-filename span{
 	border: 1px dashed rgba(0, 0, 0, 0.8);
 }
