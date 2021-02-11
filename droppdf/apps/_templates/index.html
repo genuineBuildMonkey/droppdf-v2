@@ -7,7 +7,9 @@
 
 	<title>Drag and Drop a document</title>
 	<link rel="stylesheet" type="text/css" href="{% static "/apps/css/index.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "/apps/css/index.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "/apps/css/dropzone_custom.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "/vendor/font-awesome-4.7.0/css/font-awesome.min.css" %}" />
 
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-181082912-1"></script>
@@ -30,10 +32,22 @@
 	<div id="progressbar"></div>
 
 	<div class="main" align="center">
-		
+
 	    <div id="dropzone" class="dropzone_new">
+
 			<div class="label">
-				Drag and drop a document to annotate it.<br/>
+
+                <!--<div id="upload-error" style="display: none">-->
+                <div id="upload-error" class="error">
+                    <div style="text-align: right">
+                        <i class="fa fa-times-circle" onclick="closeError()"></i>
+                    </div>
+                    <div id="upload-error-content">
+                    </div>
+                </div>
+
+				Drag and drop a document to annotate it.
+                <br/>
 
                 <input style="border-radius: 3px; padding: 3px; border: 0px;"
                 size="30"

@@ -128,12 +128,21 @@ $(document).ready(function(){
             this.on("success", function(file, filename) {
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
+                console.log(filename);
+
+                if (filename == 'pdf has no text or is image pdf') {
+                    alert('image pdf');
+                };
+
+                return;
+
                 if(type == 'pdf') {
                     window.location.href = '/pdf/' + filename + '/'
                 };
             });
 
-            this.on("error", function(file, file_url) {
+            this.on("error", function(file, error, xhr) {
+                console.log('X', xhr.status);
             });
 
             this.on("removedfile", function(file) {

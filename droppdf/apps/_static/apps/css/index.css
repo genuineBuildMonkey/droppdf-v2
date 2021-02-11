@@ -37,6 +37,14 @@ img{
     text-decoration: none;
     color: white;
 }
+.label .error{
+    font-size:15px;
+    background-color: #D58D8F;
+    border: 2px solid #D4272C;
+    border-radius: 5px;
+    color: #E5070E;
+    padding: 3px;
+}
 .dz-filename span{
 	border: 1px dashed rgba(0, 0, 0, 0.8);
 }

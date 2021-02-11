@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotFound,\
         HttpResponseNotAllowed 
 
-from django.core.exceptions import SuspiciousFileOperation
+from django.core.exceptions import SuspiciousFileOperation, ValidationError
 
 from django.conf import settings
 
@@ -92,6 +92,11 @@ def _randomword(length):
                for i in range(length))
 
 
+def _check_pdf_has_text(file_):
+    return False
+    #pass
+
+
 def home(request):
     return render(request, 'index.html', {'request': request})
 
@@ -111,6 +116,12 @@ def upload(request):
         temp = filename.split('.')
         basename = '.'.join(temp[:-1])
         extension = temp[-1]
+
+        if extension == 'pdf':
+            if not _check_pdf_has_text(file_):
+                #return HttpResponse('pdf has no text or is image pdf')
+                raise Http404('pdf has no text')
+
 
         new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
 
