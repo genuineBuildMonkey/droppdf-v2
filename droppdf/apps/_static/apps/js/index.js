@@ -42,11 +42,6 @@ function handleauthresult(authresult) {
 }
 
 $(document).ready(function(){
-
-    //store label text so we can put it back
-    //after upload without typing all that again
-    var label_text = $('.label').first().html();
-
     var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
 
     var options = {
@@ -118,9 +113,7 @@ $(document).ready(function(){
                 }
                 else {
                     setTimeout(function() {
-                        //alert('Upload Error: Document format not recognized.');
-                        //$(".main .label").html(label_text);
-
+                        //filetype error
                     }, 700);
 
                     this.removeFile(file);
@@ -129,8 +122,6 @@ $(document).ready(function(){
 
             this.on("success", function(file, filename) {
                 $('[data-dz-uploadprogress]').css('width', '100%');
-
-                console.log(filename);
 
                 if (filename == 'pdf has no text or is image pdf') {
                     alert('image pdf');
@@ -198,7 +189,7 @@ $(document).ready(function(){
 function dropUpload() {
     if(addedFile == 1){
         myDropzone.removeFile(fileObj);
-        $(".main .label").html(label_text);
+        //$(".main .label").html(label_text);
         addedFile = 0;
         fileObj = null;
         filename = "";

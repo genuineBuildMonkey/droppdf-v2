@@ -1,6 +1,8 @@
 import random, string
 import re
 import urllib
+import os
+import subprocess
 
 from sanitize_filename import sanitize
 
@@ -94,9 +96,50 @@ def _randomword(length):
                for i in range(length))
 
 
-def _check_pdf_has_text(file_):
-    return False
-    #pass
+def _check_pdf_has_text(new_filename):
+    '''Check if if pdf has text or is image pdf.
+    Use cli tool "pdftotext" from poppler libs.
+
+    An image pdf will usually show some "text" so discard very short results
+    after replacing newlines and blank spaces etc. in first 1,000 or so chars'''
+    try:
+    
+        cmd = 'pdftotext "/tmp/{0}" -'.format(new_filename)
+
+        rslt = subprocess.check_output(cmd, shell=True)
+
+        rslt = rslt[:1000].decode('utf-8')
+        
+        #remove whitespace, newlines etc.
+        rslt = re.sub(r'\W', '', rslt)
+
+        if len(rslt) < 3:
+            return False
+
+        return True
+
+    except:
+        return False
+
+
+def _save_temp_file(new_filename, file_):
+    '''Save file to disk in /tmp directory'''
+    tempfile_path = os.path.join('/tmp', new_filename)
+    fd = open(tempfile_path, 'wb')
+
+    for chunk in file_.chunks():
+        fd.write(chunk)
+    fd.close()
+
+
+def _cleanup_temp_file(new_filename):
+    '''Delete temp file from /tmp directory if exists'''
+    try:
+        tempfile_path = os.path.join('/tmp', new_filename)
+        os.remove(tempfile_path)
+
+    except (OSError, FileNotFoundError):
+        pass
 
 
 def home(request):
@@ -119,16 +162,27 @@ def upload(request):
         basename = '.'.join(temp[:-1])
         extension = temp[-1]
 
+        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+
+        #save file to disk temporarily.
+        #later it will be deleted after uploading.
+        _save_temp_file(new_filename, file_)
+
+
         if extension == 'pdf':
-            if not _check_pdf_has_text(file_):
+            #check if is an image pdf or if it has text
+            if not _check_pdf_has_text(new_filename):
+                _cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
 
-        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+
 
         s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
         s3.save_to_bucket(new_filename, file_)
+
+        _cleanup_temp_file(new_filename)
 
         return HttpResponse(new_filename)
 
