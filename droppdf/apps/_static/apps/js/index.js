@@ -44,6 +44,8 @@ function handleauthresult(authresult) {
 $(document).ready(function(){
     var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
 
+    var type = "";
+
     var options = {
         url: "/upload/",
         headers: {
@@ -127,7 +129,7 @@ $(document).ready(function(){
                     alert('image pdf');
                 };
 
-                return;
+                //return;
 
                 if(type == 'pdf') {
                     window.location.href = '/pdf/' + filename + '/'

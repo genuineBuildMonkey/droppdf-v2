@@ -123,13 +123,18 @@ def _check_pdf_has_text(new_filename):
 
 
 def _save_temp_file(new_filename, file_):
-    '''Save file to disk in /tmp directory'''
+    '''Save file to disk in /tmp directory.
+    returns temp file path'''
     tempfile_path = os.path.join('/tmp', new_filename)
+
     fd = open(tempfile_path, 'wb')
 
     for chunk in file_.chunks():
         fd.write(chunk)
+
     fd.close()
+
+    return tempfile_path
 
 
 def _cleanup_temp_file(new_filename):
@@ -166,7 +171,7 @@ def upload(request):
 
         #save file to disk temporarily.
         #later it will be deleted after uploading.
-        _save_temp_file(new_filename, file_)
+        tempfile_path = _save_temp_file(new_filename, file_)
 
 
         if extension == 'pdf':
@@ -175,12 +180,12 @@ def upload(request):
                 _cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
-
-
-
         s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
-        s3.save_to_bucket(new_filename, file_)
+        saved_file = open(tempfile_path, 'rb')
+
+        #s3.save_to_bucket(new_filename, file_)
+        s3.save_to_bucket(new_filename, saved_file)
 
         _cleanup_temp_file(new_filename)
 
