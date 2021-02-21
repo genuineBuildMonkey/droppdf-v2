@@ -108,7 +108,7 @@ def _check_pdf_has_text(new_filename):
 
         rslt = subprocess.check_output(cmd, shell=True)
 
-        rslt = rslt[:1000].decode('utf-8')
+        rslt = rslt[:1000].decode('utf-8', 'ignore')
         
         #remove whitespace, newlines etc.
         rslt = re.sub(r'\W', '', rslt)
@@ -118,7 +118,8 @@ def _check_pdf_has_text(new_filename):
 
         return True
 
-    except:
+    except Exception as e:
+        #print(e)
         return False
 
 

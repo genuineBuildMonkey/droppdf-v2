@@ -23,7 +23,6 @@ def youtube_video(request, video_id):
         text = entry.get('text', '')
         duration = entry.get('duration', 0)
 
-        #text = text.encode('utf-8', 'ignore')
         text = text.replace('\n', ' ')
 
         try:
