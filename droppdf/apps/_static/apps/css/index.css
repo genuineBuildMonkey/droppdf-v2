@@ -42,8 +42,14 @@ img{
     background-color: #D58D8F;
     border: 2px solid #D4272C;
     border-radius: 5px;
-    color: #E5070E;
-    padding: 3px;
+    color: #BE1530; 
+    padding: 1em;
+    position: relative;
+    text-align: left;
+}
+.label .error a{
+    text-decoration: none;
+    color: #0006EF !important;
 }
 .label i:hover{
     cursor: pointer;

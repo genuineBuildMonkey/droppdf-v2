@@ -1,9 +1,10 @@
-var myDropzone;
+var dropzone;
 var addedFile = 0;
-var fileObj;
+//var fileObj;
 var filename = "";
-var ocr_progress;
-var ocr_progress_status = 0;
+//var progress = 0;
+//var ocr_progress;
+//var ocr_progress_status = 0;
 var estimated_time = 0;
 
 var type = "";
@@ -54,6 +55,8 @@ $(document).ready(function(){
 
         paramName: "file",
 
+        autoProcessQueue: true,
+
         timeout: 120000,
 
         clickable: false,
@@ -83,10 +86,6 @@ $(document).ready(function(){
         },
 
         accept: function(file, done) {
-            $("#progressbar").show();
-
-            fileObj = file;
-
             $('#main-content-text').hide();
 
             $('#process-content-text')
@@ -114,22 +113,12 @@ $(document).ready(function(){
                     }
                 }
                 else {
-                    setTimeout(function() {
-                        //filetype error
-                    }, 700);
-
                     this.removeFile(file);
                 }
             });
 
             this.on("success", function(file, filename) {
                 $('[data-dz-uploadprogress]').css('width', '100%');
-
-                if (filename == 'pdf has no text or is image pdf') {
-                    alert('image pdf');
-                };
-
-                //return;
 
                 if(type == 'pdf') {
                     window.location.href = '/pdf/' + filename + '/'
@@ -140,7 +129,12 @@ $(document).ready(function(){
 
                 /* if 406 "Not Acceptable" pdf has no text */
                 if (xhr.status == 406) {
-                    var html = 'error'; 
+                    var ocr_url = window.location.origin + '/ocr';
+
+                    var html = '<div>This document is an image PDF or has no annotable text.</div><div>If you would like to turn it into an annotable document please use the OCR feature at '; 
+                    html += '<span><a href="'
+                    html += ocr_url; 
+                    html += '">' + ocr_url + '</a></span>';
 
                     displayError(html);
                 };
@@ -148,21 +142,6 @@ $(document).ready(function(){
             });
 
             this.on("removedfile", function(file) {
-                if (addedFile == 1) {
-                    $.ajax({
-                        type: "GET",
-                        url:  '/drop/?filename=' + filename,
-                        success: function (data) {
-                            addedFile = 0;
-                            fileObj = null;
-                            filename = "";
-                            ocr_progress_status = 0;
-                            estimated_time = 0;
-                        },
-                        error: function (x, e) {
-                        }
-                    })
-                }
             });
         },
 
@@ -172,33 +151,22 @@ $(document).ready(function(){
         $('#upload-error-content')
             .empty()
             .html(html);
-    };
 
-    window.closeError = function() {
-        $('#upload-error-content').empty();
-
-        $('#upload-error').hide();
+        $('#upload-error')
+            .show();
 
         $('#process-content-text').hide();
 
-        $('#main-content-text').show();
     };
 
-    myDropzone = new Dropzone("div#dropzone", options);
+    window.closeError = function() {
+        window.location.reload(true);
+    };
+
+    dropzone = new Dropzone("div#dropzone", options);
 
 });
 
-function dropUpload() {
-    if(addedFile == 1){
-        myDropzone.removeFile(fileObj);
-        //$(".main .label").html(label_text);
-        addedFile = 0;
-        fileObj = null;
-        filename = "";
-        ocr_progress_status = 0;
-        estimated_time = 0;
-    }
-}
 
 function openYouTubeUrl() {
     var match, video
