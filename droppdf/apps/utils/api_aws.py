@@ -1,3 +1,4 @@
+import io
 import boto3
 from django.conf import settings
 
@@ -81,3 +82,15 @@ class S3():
             :return: None''' 
         
         self.resource.Object(self.bucket, name).delete()
+
+
+    def download_fileobj_from_bucket(self, name):
+        '''download file from bucket. 
+            :param str name
+            :return: memory file object (io.BytesIO)''' 
+
+        s3_obj = self.resource.Object(self.bucket, name)
+        fakefile = io.BytesIO()
+        s3_obj.download_fileobj(fakefile)
+
+        return fakefile

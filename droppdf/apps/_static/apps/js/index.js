@@ -120,9 +120,15 @@ $(document).ready(function(){
             this.on("success", function(file, filename) {
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
-                if(type == 'pdf') {
+                if (type == 'pdf') {
                     window.location.href = '/pdf/' + filename + '/'
-                };
+                }
+                else if (type == 'csv') {
+                    window.location.href = '/csv/' + filename + '/'
+                }
+                else {
+                    alert('error')
+                }
             });
 
             this.on("error", function(file, error, xhr) {

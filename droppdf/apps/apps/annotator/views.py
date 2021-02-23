@@ -181,6 +181,9 @@ def upload(request):
                 _cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
+        #elif extension == 'csv':
+
+
         s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
         saved_file = open(tempfile_path, 'rb')
@@ -201,3 +204,24 @@ def pdf(request, filename):
     url = s3.get_presigned_url(filename)
 
     return render(request, 'viewer.html', {'pdf_url': url})
+
+
+def csv(request, filename):
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    file_obj = s3.download_fileobj_from_bucket(filename)
+
+    csv_content = file_obj.getvalue()
+
+    print(csv_content)
+
+    return render(request, 'not_implemented.html', {})
+
+
+    #with open(file_path, 'rU') as file_:
+        #reader = csv.reader(file_)
+        #title = reader.next()
+        #content = [i for i in reader]
+
+    #return render_to_response('table.html', locals())
+
