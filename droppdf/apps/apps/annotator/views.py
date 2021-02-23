@@ -3,6 +3,7 @@ import re
 import urllib
 import os
 import subprocess
+import csv
 
 from sanitize_filename import sanitize
 
@@ -206,22 +207,19 @@ def pdf(request, filename):
     return render(request, 'viewer.html', {'pdf_url': url})
 
 
-def csv(request, filename):
+def csv_view(request, filename):
     s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
     file_obj = s3.download_fileobj_from_bucket(filename)
 
-    csv_content = file_obj.getvalue()
+    csv_data = file_obj.getvalue().decode('utf-8', 'ignore')
 
-    print(csv_content)
+    reader = csv.reader(csv_data.splitlines())
 
-    return render(request, 'not_implemented.html', {})
+    full_content = [i for i in reader]
 
+    headers = full_content[0] 
 
-    #with open(file_path, 'rU') as file_:
-        #reader = csv.reader(file_)
-        #title = reader.next()
-        #content = [i for i in reader]
+    content = full_content[1:] 
 
-    #return render_to_response('table.html', locals())
-
+    return render(request, 'csv_table.html', locals())

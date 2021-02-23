@@ -127,7 +127,8 @@ $(document).ready(function(){
                     window.location.href = '/csv/' + filename + '/'
                 }
                 else {
-                    alert('error')
+                    var html = '<div>Filetype not supported</div>'; 
+                    displayError(html);
                 }
             });
 
