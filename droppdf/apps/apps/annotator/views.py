@@ -223,3 +223,11 @@ def csv_view(request, filename):
     content = full_content[1:] 
 
     return render(request, 'csv_table.html', locals())
+
+
+def epub(request, filename):
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    url = s3.get_presigned_url(filename)
+
+    return render(request, 'epub.html', {'book_url': url})

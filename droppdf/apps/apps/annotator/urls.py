@@ -7,4 +7,5 @@ urlpatterns = [
         path('upload/', view=upload, name="upload"),
         path('pdf/<filename>/', view=pdf, name="pdf"),
         path('csv/<filename>/', view=csv_view, name="csv"),
+        path('epub/<filename>/', view=epub, name="epub"),
         ]

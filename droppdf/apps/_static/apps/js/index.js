@@ -118,6 +118,8 @@ $(document).ready(function(){
             });
 
             this.on("success", function(file, filename) {
+                console.log(type);
+
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
                 if (type == 'pdf') {
@@ -125,6 +127,9 @@ $(document).ready(function(){
                 }
                 else if (type == 'csv') {
                     window.location.href = '/csv/' + filename + '/'
+                }
+                else if (type == 'epub') {
+                    window.location.href = '/epub/' + filename + '/'
                 }
                 else {
                     var html = '<div>Filetype not supported</div>'; 
