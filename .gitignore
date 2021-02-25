@@ -17,8 +17,8 @@ venv.bak/
 ENV/ 
 
 # JS build and package files
-build/
-dist/
+#build/
+#dist/
 node_modules
 
 # Packaging
