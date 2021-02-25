@@ -12,7 +12,7 @@ def youtube_video(request, video_id):
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
     except:
-        return render_to_response('youtube_not_found.html', {})
+        return render('youtube_not_found.html', {})
 
     subseconds = 0
     condensed_entry = None
