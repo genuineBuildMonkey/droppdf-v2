@@ -5,7 +5,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta http-equiv="expires" content="timestamp">
+  <meta http-equiv="cache-control" content="no-cache" />
+
   <title>{{ filename }}</title>
+  <link rel="stylesheet" type="text/css" href="{% static '/vendor/epubjs/epub.css' %}">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-181082912-1"></script>
@@ -34,17 +40,14 @@
       };
     };
   </script>
-  <script src="https://cdn.hypothes.is/hypothesis"></script>
-
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <link rel="stylesheet" type="text/css" href="{% static '/apps/css/epub.css' %}">
+  <script src="https://cdn.hypothes.is/hypothesis?ver=1.1"></script>
+  <!--<script src="https://hypothes.is/embed.js?ver=1.1"></script>-->
 
   <script>
     window.bookUrl = "{{ book_url }}";
   </script>
 
-  <script src="{% static '/vendor/epubjs/reader.js' %}"></script>
+  <script src="{% static '/vendor/epubjs/reader.js' %}?ver=1.1"></script>
 
 </head>
 <body>
@@ -70,6 +73,9 @@
     <h2 id="author">...</h2>
     <ul id="toc"></ul>
   </div>
+
+  <script>
+  </script>
 
 </body>
 </html>

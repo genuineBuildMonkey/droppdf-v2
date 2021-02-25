@@ -62,6 +62,16 @@
       // TODO: this is needed to trigger the hypothesis client
       // to inject into the iframe
       requestAnimationFrame(function () {
+
+        //add h when rendered 
+        //TODO annotator isn't working without reload
+        //setTimeout(function() {
+          //var s = document.createElement("script");
+          //s.type = "text/javascript";
+          //s.src = "https://hypothes.is/embed.js";
+          //document.getElementsByTagName('head')[0].append(s);
+        //}, 3000);
+
         hiddenTitle.textContent = section.href;
       })
 
