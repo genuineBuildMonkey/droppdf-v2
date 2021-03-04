@@ -20,6 +20,8 @@ from django.conf import settings
 
 from apps.utils.api_aws import S3
 
+from apps.tasks import ocr_pdf
+
 #def save_file(file, path='', extension='pdf'):
     #temp = settings.BASE_DIR + settings.STATIC_URL + str(path)
 
@@ -175,7 +177,6 @@ def upload(request):
         #later it will be deleted after uploading.
         tempfile_path = _save_temp_file(new_filename, file_)
 
-
         if extension == 'pdf':
             #check if is an image pdf or if it has text
             if not _check_pdf_has_text(new_filename):
@@ -231,3 +232,27 @@ def epub(request, filename):
     url = s3.get_presigned_url(filename)
 
     return render(request, 'epub.html', {'book_url': url})
+
+
+def ocr_pdf(request):
+    if request.method == 'POST':
+        file_ = request.FILES['file']
+
+        filename = file_.name
+
+        if not filename or len(filename) < 3 or not '.' in filename:
+            raise SuspiciousFileOperation('improper file name')
+
+        filename = sanitize(filename)
+
+        temp = filename.split('.')
+        basename = '.'.join(temp[:-1])
+        extension = temp[-1]
+
+        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+
+        rslt = test_task.delay('paul')
+
+        return HttpResponse(new_filename)
+
+    return HttpResponseNotAllowed(['POST,'])

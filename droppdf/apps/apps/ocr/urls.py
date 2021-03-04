@@ -4,4 +4,5 @@ from .views import *
 
 urlpatterns = [
         path('ocr/', ocr, name='ocr'),
+        path('ocr/upload', upload, name='ocr_upload'),
         ]
