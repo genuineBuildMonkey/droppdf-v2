@@ -177,6 +177,18 @@ $(document).ready(function(){
 
     dropzone = new Dropzone("div#dropzone", options);
 
+    $('#drop-icon').on('click', function() {
+        new_options = Object.assign(options);
+        new_options.clickable = true;
+
+        dropzone.destroy();
+
+        dropzone = new Dropzone("div#dropzone", new_options);
+
+        $('#dropzone').click();
+
+    });
+
 });
 
 
