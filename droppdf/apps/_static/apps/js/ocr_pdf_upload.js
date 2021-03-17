@@ -14,6 +14,8 @@
         formData.append('pdf-file', $('#pdf-file')[0].files[0]);
         formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
 
+        console.log('aaa')
+
 
         $.ajax({
             url : '/ocr/upload_and_check',
@@ -33,6 +35,7 @@
             processData: false,
             contentType: false,
             success : function(response) {
+                console.log('s');
 
                 if (response && response.file_info) {
 
@@ -63,10 +66,11 @@
                             .removeClass('disabled')
                             .attr('disabled', false)
                     }
-
                 };
             },
             fail: function(error) {
+                console.log('e');
+
                 $('#in-progress').hide();
 
                 $('#pdf-file').attr('disabled', false);
@@ -80,6 +84,14 @@
                 $('#upload-error')
                     .text('error uploading document')
                     .show();
+            },
+            statusCode: {
+                //console.log('x', this);
+                404: function() {
+                    this.fail();
+                    //console.log('x', this);
+                    //alert( "page not found" );
+                }
             },
         });
     };
