@@ -28,3 +28,10 @@ def cleanup_temp_file(new_filename):
 
     except (OSError, FileNotFoundError):
         pass
+
+
+def check_file_exists(md5_hash):
+    '''Check database for hash.
+    Return filename if exists, otherwise False'''
+    pass
+

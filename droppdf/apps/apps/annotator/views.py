@@ -19,7 +19,7 @@ from django_http_exceptions import HTTPExceptions
 from django.conf import settings
 
 from apps.utils.api_aws import S3
-from apps.utils.tempfiles import save_temp_file, cleanup_temp_file 
+from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists  
 
 #from apps.tasks import ocr_pdf
 
@@ -147,10 +147,12 @@ def upload(request):
         basename = '.'.join(temp[:-1])
         extension = temp[-1]
 
+        basename = basename[:60]
+
         new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
 
         #save file to disk temporarily.
-        #later it will be deleted after uploading.
+        #later it will be deleted after uploading to s3.
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
 
         #TODO check file exists already
@@ -158,7 +160,7 @@ def upload(request):
         if extension == 'pdf':
             #check if is an image pdf or if it has text
             if not _check_pdf_has_text(new_filename):
-                _cleanup_temp_file(new_filename)
+                cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
         #elif extension == 'csv':

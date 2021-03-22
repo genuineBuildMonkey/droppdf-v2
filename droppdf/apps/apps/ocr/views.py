@@ -11,7 +11,7 @@ from django.shortcuts import render
 
 from django_http_exceptions import HTTPExceptions
 
-from apps.utils.tempfiles import save_temp_file, cleanup_temp_file 
+from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists
 
 def _randomword(length):
        return ''.join(random.choice(string.ascii_lowercase + string.digits)\
@@ -50,10 +50,11 @@ def upload(request):
 
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
 
-        print(md5_hash)
+        if not check_file_exists(md5_hash):
+            pass
 
-        #rslt = test_task.delay('paul')
-        cleanup_temp_file(new_filename)
+        else:
+            cleanup_temp_file(new_filename)
 
         return HttpResponse(new_filename)
 

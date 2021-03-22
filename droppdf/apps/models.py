@@ -3,10 +3,10 @@ from django.db import models
 # Create your models here.
 
 class FileUload(models.Model):
-    '''reference to cloud upload'''
-    name = models.CharField(max_length=35)
+    '''Reference to cloud upload'''
+    filename = models.CharField(max_length=75)
 
-    url = models.CharField(max_length=50)
+    md5_hash = models.CharField(max_length=25)
 
     extension = models.CharField(max_length=8)
 
