@@ -19,8 +19,9 @@ from django_http_exceptions import HTTPExceptions
 from django.conf import settings
 
 from apps.utils.api_aws import S3
+from apps.utils.tempfiles import save_temp_file, cleanup_temp_file 
 
-from apps.tasks import ocr_pdf
+#from apps.tasks import ocr_pdf
 
 #def save_file(file, path='', extension='pdf'):
     #temp = settings.BASE_DIR + settings.STATIC_URL + str(path)
@@ -126,31 +127,6 @@ def _check_pdf_has_text(new_filename):
         return False
 
 
-def _save_temp_file(new_filename, file_):
-    '''Save file to disk in /tmp directory.
-    returns temp file path'''
-    tempfile_path = os.path.join('/tmp', new_filename)
-
-    fd = open(tempfile_path, 'wb')
-
-    for chunk in file_.chunks():
-        fd.write(chunk)
-
-    fd.close()
-
-    return tempfile_path
-
-
-def _cleanup_temp_file(new_filename):
-    '''Delete temp file from /tmp directory if exists'''
-    try:
-        tempfile_path = os.path.join('/tmp', new_filename)
-        os.remove(tempfile_path)
-
-    except (OSError, FileNotFoundError):
-        pass
-
-
 def home(request):
     return render(request, 'index.html', {'request': request})
 
@@ -175,7 +151,9 @@ def upload(request):
 
         #save file to disk temporarily.
         #later it will be deleted after uploading.
-        tempfile_path = _save_temp_file(new_filename, file_)
+        md5_hash, tempfile_path = save_temp_file(new_filename, file_)
+
+        #TODO check file exists already
 
         if extension == 'pdf':
             #check if is an image pdf or if it has text
@@ -193,7 +171,7 @@ def upload(request):
         #s3.save_to_bucket(new_filename, file_)
         s3.save_to_bucket(new_filename, saved_file)
 
-        _cleanup_temp_file(new_filename)
+        cleanup_temp_file(new_filename)
 
         return HttpResponse(new_filename)
 
@@ -232,27 +210,3 @@ def epub(request, filename):
     url = s3.get_presigned_url(filename)
 
     return render(request, 'epub.html', {'book_url': url})
-
-
-def ocr_pdf(request):
-    if request.method == 'POST':
-        file_ = request.FILES['file']
-
-        filename = file_.name
-
-        if not filename or len(filename) < 3 or not '.' in filename:
-            raise SuspiciousFileOperation('improper file name')
-
-        filename = sanitize(filename)
-
-        temp = filename.split('.')
-        basename = '.'.join(temp[:-1])
-        extension = temp[-1]
-
-        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
-
-        rslt = test_task.delay('paul')
-
-        return HttpResponse(new_filename)
-
-    return HttpResponseNotAllowed(['POST,'])

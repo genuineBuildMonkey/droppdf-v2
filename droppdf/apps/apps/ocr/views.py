@@ -1,8 +1,17 @@
+import time
+import re
+import random
+import string
+
+from sanitize_filename import sanitize
+
 from django.http import HttpResponse, HttpResponseNotAllowed 
 
 from django.shortcuts import render
 
 from django_http_exceptions import HTTPExceptions
+
+from apps.utils.tempfiles import save_temp_file, cleanup_temp_file 
 
 def _randomword(length):
        return ''.join(random.choice(string.ascii_lowercase + string.digits)\
@@ -38,6 +47,13 @@ def upload(request):
             raise SuspiciousFileOperation('improper file type')
 
         new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+
+        md5_hash, tempfile_path = save_temp_file(new_filename, file_)
+
+        print(md5_hash)
+
+        #rslt = test_task.delay('paul')
+        cleanup_temp_file(new_filename)
 
         return HttpResponse(new_filename)
 
