@@ -39,7 +39,12 @@ def check_file_exists(md5_hash):
     '''Check database for hash.
     Return filename if exists, otherwise False'''
 
-    pass
+    obj = FileUload.objects.filter(md5_hash=md5_hash)
+
+    if obj.exists():
+        return obj.first().name
+
+    return False
 
 
 def file_record_db(md5_hash, filename):
