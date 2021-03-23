@@ -1,4 +1,3 @@
-import random, string
 import re
 import urllib
 import os
@@ -19,7 +18,7 @@ from django_http_exceptions import HTTPExceptions
 from django.conf import settings
 
 from apps.utils.api_aws import S3
-from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists  
+from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
 
 #from apps.tasks import ocr_pdf
 
@@ -95,9 +94,9 @@ from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exist
         #return filename_noextension + "-" + rand_key + '.epub'
 
 
-def _randomword(length):
-       return ''.join(random.choice(string.ascii_lowercase + string.digits)\
-               for i in range(length))
+#def _randomword(length):
+       #return ''.join(random.choice(string.ascii_lowercase + string.digits)\
+               #for i in range(length))
 
 
 def _check_pdf_has_text(new_filename):
@@ -149,13 +148,11 @@ def upload(request):
 
         basename = basename[:60]
 
-        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+        new_filename = '{0}-{1}.{2}'.format(basename, randomword(5), extension)
 
         #save file to disk temporarily.
         #later it will be deleted after uploading to s3.
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
-
-        #TODO check file exists already
 
         if extension == 'pdf':
             #check if is an image pdf or if it has text
@@ -163,15 +160,18 @@ def upload(request):
                 cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
-        #elif extension == 'csv':
+        existing_name = check_file_exists(md5_hash)
 
+        if not existing_name:
 
-        s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
-        saved_file = open(tempfile_path, 'rb')
+            saved_file = open(tempfile_path, 'rb')
 
-        #s3.save_to_bucket(new_filename, file_)
-        s3.save_to_bucket(new_filename, saved_file)
+            s3.save_to_bucket(new_filename, saved_file)
+
+        else:
+            new_filename = existing_name
 
         cleanup_temp_file(new_filename)
 

@@ -1,21 +1,18 @@
 import time
 import re
 import random
-import string
 
 from sanitize_filename import sanitize
 
-from django.http import HttpResponse, HttpResponseNotAllowed 
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 
 from django.shortcuts import render
 
 from django_http_exceptions import HTTPExceptions
 
-from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists
 
-def _randomword(length):
-       return ''.join(random.choice(string.ascii_lowercase + string.digits)\
-               for i in range(length))
+from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
+
 
 def ocr(request):
     return render(request, 'ocr_pdf.html', {})
@@ -46,15 +43,24 @@ def upload(request):
         if not extension in ('pdf', 'PDF'):
             raise SuspiciousFileOperation('improper file type')
 
-        new_filename = '{0}-{1}.{2}'.format(basename, _randomword(5), extension)
+        basename = basename[:60]
+
+        new_filename = '{0}-{1}.{2}'.format(basename, randomword(5), extension)
 
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
 
         if not check_file_exists(md5_hash):
-            pass
+
+            cleanup_temp_file(new_filename)
+
+            return JsonResponse({'existing': false, 'filename': new_filename})
 
         else:
+
             cleanup_temp_file(new_filename)
+
+            return JsonResponse({'existing': true, 'filename': new_filename})
+
 
         return HttpResponse(new_filename)
 

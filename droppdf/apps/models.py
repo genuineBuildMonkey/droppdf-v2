@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class FileUload(models.Model):
     '''Reference to cloud upload'''
     filename = models.CharField(max_length=75)
@@ -9,6 +7,11 @@ class FileUload(models.Model):
     md5_hash = models.CharField(max_length=25)
 
     extension = models.CharField(max_length=8)
+
+    is_original = models.BooleanField(default=True)
+
+    parent = models.ForeignKey('FileUload', on_delete=models.CASCADE,
+            null=True, default=None)
 
     created = models.DateTimeField(auto_now=False, auto_now_add=True)
 
