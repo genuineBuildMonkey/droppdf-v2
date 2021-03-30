@@ -20,6 +20,8 @@ from django.conf import settings
 from apps.utils.api_aws import S3
 from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
 
+from apps.models import FileUload
+
 #from apps.tasks import ocr_pdf
 
 #def save_file(file, path='', extension='pdf'):
@@ -142,13 +144,16 @@ def upload(request):
 
         filename = sanitize(filename)
 
+        filename = filename.replace("'", '').replace('"', '')
+        filename = re.sub(r"[\(,\),\s]+", "-", filename)
+
         temp = filename.split('.')
         basename = '.'.join(temp[:-1])
         extension = temp[-1]
 
         basename = basename[:60]
 
-        new_filename = '{0}-{1}.{2}'.format(basename, randomword(5), extension)
+        new_filename = '{0}-{1}.{2}'.format(basename, randword(5), extension)
 
         #save file to disk temporarily.
         #later it will be deleted after uploading to s3.
@@ -160,6 +165,8 @@ def upload(request):
                 cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
+        #print(len(md5_hash))
+
         existing_name = check_file_exists(md5_hash)
 
         if not existing_name:
@@ -169,6 +176,12 @@ def upload(request):
             saved_file = open(tempfile_path, 'rb')
 
             s3.save_to_bucket(new_filename, saved_file)
+
+            #save ref to db
+            ref = FileUload(filename=new_filename, md5_hash=md5_hash,
+                    extension=extension, is_original=True)
+
+            ref.save()
 
         else:
             new_filename = existing_name

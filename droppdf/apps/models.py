@@ -4,7 +4,7 @@ class FileUload(models.Model):
     '''Reference to cloud upload'''
     filename = models.CharField(max_length=75)
 
-    md5_hash = models.CharField(max_length=25)
+    md5_hash = models.CharField(max_length=64)
 
     extension = models.CharField(max_length=8)
 
