@@ -43,7 +43,7 @@ def check_file_exists(md5_hash):
     obj = FileUload.objects.filter(md5_hash=md5_hash)
 
     if obj.exists():
-        return obj.first().name
+        return obj.first().filename
 
     return False
 

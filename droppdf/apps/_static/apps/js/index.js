@@ -43,9 +43,7 @@ function handleauthresult(authresult) {
 }
 
 $(document).ready(function(){
-    var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
-
-    var type = "";
+    var valid_extensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.csv', '.epub'];
 
     var options = {
         url: "/upload/",
@@ -56,6 +54,8 @@ $(document).ready(function(){
         paramName: "file",
 
         autoProcessQueue: true,
+
+        acceptedFiles: valid_extensions.join(','), 
 
         timeout: 120000,
 
@@ -97,28 +97,35 @@ $(document).ready(function(){
 
         init: function() {
             this.on("addedfile", function(file) {
-                var extention = file.name.split(".");
-                extention = extention[extention.length-1];
-                extention = extention.toLowerCase();
+                var extension = file.name.split(".");
+                extension = extension[extension.length-1];
+                extension = extension.toLowerCase();
             
-                var valid_extensions = ['pdf', 'docx', 'xlsx', 'doc', 'xls', 'csv', 'epub'];
-                
-                if (valid_extensions.includes(extention)) {
-                    type = extention
+                if (valid_extensions.includes('.' + extension)) {
+
+                    type = extension
+
                     if (addedFile == 0) {
                         addedFile = 1;
                     }
                     else {
-                        this.removeFile(file);
+                        //this.removeFile(file);
+                        var html = '<div>Invalid filetype</div>';
+                        displayError(html);
+                        return false;
                     }
                 }
                 else {
-                    this.removeFile(file);
+                    var html = '<div>Invalid filetype</div>';
+                    displayError(html);
+
+                    return false;
+                    //this.removeFile(file);
                 }
             });
 
             this.on("success", function(file, filename) {
-                console.log(type);
+                console.log('a', type)
 
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
@@ -138,9 +145,11 @@ $(document).ready(function(){
             });
 
             this.on("error", function(file, error, xhr) {
+                console.log(file, error, xhr)
+
 
                 /* if 406 "Not Acceptable" pdf has no text */
-                if (xhr.status == 406) {
+                if (xhr && xhr.status == 406) {
                     var ocr_url = window.location.origin + '/ocr';
 
                     var html = '<div>This document is an image PDF or has no annotable text.</div><div>If you would like to turn it into an annotable document please use the OCR feature at '; 

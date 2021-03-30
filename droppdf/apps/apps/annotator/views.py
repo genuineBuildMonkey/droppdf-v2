@@ -128,6 +128,12 @@ def _check_pdf_has_text(new_filename):
         return False
 
 
+def _create_pdf(tempfile_path, new_filename, md5_hash):
+
+    print(tempfile_path, new_filename, md5_hash)
+
+
+
 def home(request):
     return render(request, 'index.html', {'request': request})
 
@@ -159,32 +165,41 @@ def upload(request):
         #later it will be deleted after uploading to s3.
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
 
+        extension = extension.lower()
+
+        #if file (or processed child) exists, return the name
+        existing_name = check_file_exists(md5_hash)
+
+        if existing_name:
+            cleanup_temp_file(new_filename)
+
+            return HttpResponse(existing_name)
+
+
+        if extension in ['doc', 'docx', 'epub', 'odt', 'ott', 'rtf', 'odp', 'ppt', 'pptx']:
+            child_name = _create_pdf(tempfile_path, new_filename, md5_hash)
+            if child_name:
+                new_filename = child_name
+
         if extension == 'pdf':
             #check if is an image pdf or if it has text
             if not _check_pdf_has_text(new_filename):
                 cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
-        #print(len(md5_hash))
 
-        existing_name = check_file_exists(md5_hash)
+        #upload to cloud
+        s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
-        if not existing_name:
+        saved_file = open(tempfile_path, 'rb')
 
-            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+        s3.save_to_bucket(new_filename, saved_file)
 
-            saved_file = open(tempfile_path, 'rb')
+        #save ref to db
+        ref = FileUload(filename=new_filename, md5_hash=md5_hash,
+                extension=extension, is_original=True)
 
-            s3.save_to_bucket(new_filename, saved_file)
-
-            #save ref to db
-            ref = FileUload(filename=new_filename, md5_hash=md5_hash,
-                    extension=extension, is_original=True)
-
-            ref.save()
-
-        else:
-            new_filename = existing_name
+        ref.save()
 
         cleanup_temp_file(new_filename)
 

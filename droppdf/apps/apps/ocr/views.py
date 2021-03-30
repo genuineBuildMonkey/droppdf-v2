@@ -62,7 +62,6 @@ def upload(request):
             s3.save_to_bucket(new_filename, saved_file)
 
 
-
             cleanup_temp_file(new_filename)
 
             return JsonResponse({'existing': false, 'filename': new_filename})
@@ -72,7 +71,6 @@ def upload(request):
             cleanup_temp_file(new_filename)
 
             return JsonResponse({'existing': true, 'filename': existing_name})
-
 
         return HttpResponse(new_filename)
 
