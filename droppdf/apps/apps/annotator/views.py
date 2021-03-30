@@ -129,6 +129,7 @@ def _check_pdf_has_text(new_filename):
 
 
 def _create_pdf(tempfile_path, new_filename, md5_hash):
+    '''create pdf,upload to s3, store ref'''
 
     print(tempfile_path, new_filename, md5_hash)
 
@@ -177,9 +178,19 @@ def upload(request):
 
 
         if extension in ['doc', 'docx', 'epub', 'odt', 'ott', 'rtf', 'odp', 'ppt', 'pptx']:
+            #transform to pdf
             child_name = _create_pdf(tempfile_path, new_filename, md5_hash)
+
+            print(child_name)
+
             if child_name:
-                new_filename = child_name
+                cleanup_temp_file(child_name)
+
+                return HttpResponse(child_name)
+
+            else:
+                #raise ValidationError('cannot convert to pdf')
+                raise HTTPExceptions.UNPROCESSABLE_ENTITY
 
         if extension == 'pdf':
             #check if is an image pdf or if it has text

@@ -43,7 +43,8 @@ function handleauthresult(authresult) {
 }
 
 $(document).ready(function(){
-    var valid_extensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.csv', '.epub'];
+    var valid_extensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.csv', '.epub',
+        '.odt', '.ott', '.rtf', '.odp', '.ppt', '.pptx']
 
     var options = {
         url: "/upload/",
@@ -138,6 +139,12 @@ $(document).ready(function(){
                 else if (type == 'epub') {
                     window.location.href = '/epub/' + filename + '/'
                 }
+
+                else if (['doc', 'docx', 'epub', 'odt', 'ott', 'rtf', 'odp', 'ppt', 'pptx'].indexOf(type) != -1) {
+                    window.location.href = '/pdf/' + filename + '/'
+                }
+
+
                 else {
                     var html = '<div>Filetype not supported</div>'; 
                     displayError(html);
@@ -159,6 +166,11 @@ $(document).ready(function(){
 
                     displayError(html);
                 };
+
+                if (xhr && xhr.status == 422) {
+                    var html = '<div>There was a problem processing your document. Perhaps try again later.</div>'; 
+                    displayError(html);
+                }
 
             });
 
