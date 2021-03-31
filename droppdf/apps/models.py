@@ -1,6 +1,6 @@
 from django.db import models
 
-class FileUload(models.Model):
+class FileUpload(models.Model):
     '''Reference to cloud upload'''
     filename = models.CharField(max_length=75)
 
@@ -10,9 +10,12 @@ class FileUload(models.Model):
 
     is_original = models.BooleanField(default=True)
 
-    parent = models.ForeignKey('FileUload', on_delete=models.CASCADE,
+    parent = models.ForeignKey('FileUpload', on_delete=models.CASCADE,
             null=True, default=None)
 
     created = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'apps_fileupload'

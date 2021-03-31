@@ -22,7 +22,7 @@ from django.conf import settings
 from apps.utils.api_aws import S3
 from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
 
-from apps.models import FileUload
+from apps.models import FileUpload
 
 #from apps.tasks import ocr_pdf
 
@@ -168,7 +168,7 @@ def _create_pdf(tempfile_path, filename, md5_hash):
     s3.save_to_bucket(pdf_file_name, saved_file)
 
     #save ref to db
-    ref = FileUload(filename=pdf_file_name, md5_hash=md5_hash,
+    ref = FileUpload(filename=pdf_file_name, md5_hash=md5_hash,
             extension=extension, is_original=False)
 
     ref.save()
@@ -257,7 +257,7 @@ def upload(request):
         s3.save_to_bucket(new_filename, saved_file)
 
         #save ref to db
-        ref = FileUload(filename=new_filename, md5_hash=md5_hash,
+        ref = FileUpload(filename=new_filename, md5_hash=md5_hash,
                 extension=extension, is_original=True)
 
         ref.save()

@@ -2,7 +2,7 @@ import os
 import string
 import random
 
-from apps.models import FileUload
+from apps.models import FileUpload
 
 from hashlib import md5
 
@@ -40,7 +40,7 @@ def check_file_exists(md5_hash):
     '''Check database for hash.
     Return filename if exists, otherwise False'''
 
-    obj = FileUload.objects.filter(md5_hash=md5_hash)
+    obj = FileUpload.objects.filter(md5_hash=md5_hash)
 
     if obj.exists():
         return obj.first().filename

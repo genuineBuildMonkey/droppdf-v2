@@ -71,6 +71,9 @@ $(document).ready(function(){
             //there is lag between full upload and complete because of upload 
             //time from server to cloud. in process.
             //complete progressbar
+
+            console.log('X', file.size);
+
             if (progress >= 100) {
                 $('#process-content-text')
                     .text('Processing...')
