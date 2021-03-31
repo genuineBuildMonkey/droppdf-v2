@@ -3,6 +3,8 @@ import urllib
 import os
 import subprocess
 import csv
+import time
+import shutil
 
 from sanitize_filename import sanitize
 
@@ -128,10 +130,60 @@ def _check_pdf_has_text(new_filename):
         return False
 
 
-def _create_pdf(tempfile_path, new_filename, md5_hash):
+def _create_pdf(tempfile_path, filename, md5_hash):
     '''create pdf,upload to s3, store ref'''
 
-    print(tempfile_path, new_filename, md5_hash)
+    print(tempfile_path, filename, md5_hash)
+
+    #libre office requires invidual environs to run multiple instances
+    #make empty file named to hash for unique we haz already.
+    loffice_environ_path = os.path.join('/tmp', md5_hash)
+
+    try:
+        os.makedirs(loffice_environ_path)
+    except FileExistsError:
+        pass
+    
+    s = filename.split('.')
+    pdf_file_name = '.'.join(s[:-1]) + '.pdf' 
+    extension = s[-1]
+
+    outpath = os.path.join('/tmp', pdf_file_name)
+
+    t1 = time.time()
+
+    try:
+        os.system('/usr/bin/soffice -env:UserInstallation=file://%s \
+            --headless --convert-to pdf %s --outdir %s' \
+            % (loffice_environ_path, tempfile_path, '/tmp'))
+    except:
+        raise HTTPExceptions.UNPROCESSABLE_ENTITY
+
+    print('time', time.time() - t1)
+
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    saved_file = open(outpath, 'rb')
+
+    s3.save_to_bucket(pdf_file_name, saved_file)
+
+    #save ref to db
+    ref = FileUload(filename=pdf_file_name, md5_hash=md5_hash,
+            extension=extension, is_original=False)
+
+    ref.save()
+
+    cleanup_temp_file(pdf_file_name)
+    cleanup_temp_file(filename)
+
+    #remove environment file
+    try:
+        shutil.rmtree(loffice_environ_path)
+    except:
+        #shrug
+        pass
+
+    return pdf_file_name
 
 
 
@@ -181,15 +233,13 @@ def upload(request):
             #transform to pdf
             child_name = _create_pdf(tempfile_path, new_filename, md5_hash)
 
-            print(child_name)
-
             if child_name:
                 cleanup_temp_file(child_name)
 
                 return HttpResponse(child_name)
 
             else:
-                #raise ValidationError('cannot convert to pdf')
+                cleanup_temp_file(child_name)
                 raise HTTPExceptions.UNPROCESSABLE_ENTITY
 
         if extension == 'pdf':
