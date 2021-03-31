@@ -43,7 +43,7 @@ function handleauthresult(authresult) {
 }
 
 $(document).ready(function(){
-    var valid_extensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.csv', '.epub',
+    var valid_extensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.ods', '.csv', '.epub',
         '.odt', '.ott', '.rtf', '.odp', '.ppt', '.pptx']
 
     var options = {
@@ -71,8 +71,19 @@ $(document).ready(function(){
             //there is lag between full upload and complete because of upload 
             //time from server to cloud. in process.
             //complete progressbar
+            var period = 150;
 
-            console.log('X', file.size);
+            if (file.size && file.size > 3500000) {
+                period = 200;
+            }
+
+            if (file.size && file.size > 7500000) {
+                period = 250;
+            }
+
+            if (file.size && file.size > 10000000) {
+                period = 350;
+            }
 
             if (progress >= 100) {
                 $('#process-content-text')
@@ -85,7 +96,7 @@ $(document).ready(function(){
                     };
                     width += 1;
                     $('[data-dz-uploadprogress]').css('width', width + '%');
-                }, 150);
+                }, period);
             };
         },
 
@@ -145,6 +156,10 @@ $(document).ready(function(){
 
                 else if (['doc', 'docx', 'epub', 'odt', 'ott', 'rtf', 'odp', 'ppt', 'pptx'].indexOf(type) != -1) {
                     window.location.href = '/pdf/' + filename + '/'
+                }
+
+                else if (['xls', 'xlsx', 'ods'].indexOf(type) != -1) {
+                    window.location.href = '/csv/' + filename + '/'
                 }
 
 

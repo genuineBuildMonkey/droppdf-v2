@@ -126,14 +126,11 @@ def _check_pdf_has_text(new_filename):
         return True
 
     except Exception as e:
-        #print(e)
         return False
 
 
 def _create_pdf(tempfile_path, filename, md5_hash):
     '''create pdf,upload to s3, store ref'''
-
-    print(tempfile_path, filename, md5_hash)
 
     #libre office requires invidual environs to run multiple instances
     #make empty file named to hash for unique we haz already.
@@ -150,7 +147,7 @@ def _create_pdf(tempfile_path, filename, md5_hash):
 
     outpath = os.path.join('/tmp', pdf_file_name)
 
-    t1 = time.time()
+    #t1 = time.time()
 
     try:
         os.system('/usr/bin/soffice -env:UserInstallation=file://%s \
@@ -159,7 +156,7 @@ def _create_pdf(tempfile_path, filename, md5_hash):
     except:
         raise HTTPExceptions.UNPROCESSABLE_ENTITY
 
-    print('time', time.time() - t1)
+    #print('time', time.time() - t1)
 
     s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
@@ -185,6 +182,59 @@ def _create_pdf(tempfile_path, filename, md5_hash):
 
     return pdf_file_name
 
+
+def _create_csv(tempfile_path, filename, md5_hash):
+    '''create csv,upload to s3, store ref'''
+
+    #libre office requires invidual environs to run multiple instances
+    #make empty file named to hash for unique we haz already.
+    loffice_environ_path = os.path.join('/tmp', md5_hash)
+
+    try:
+        os.makedirs(loffice_environ_path)
+    except FileExistsError:
+        pass
+    
+    s = filename.split('.')
+    csv_file_name = '.'.join(s[:-1]) + '.csv' 
+    extension = s[-1]
+
+    outpath = os.path.join('/tmp', csv_file_name)
+
+    #t1 = time.time()
+
+    try:
+        os.system('/usr/bin/soffice -env:UserInstallation=file://%s \
+            --headless --convert-to csv %s --outdir %s' \
+            % (loffice_environ_path, tempfile_path, '/tmp'))
+    except:
+        raise HTTPExceptions.UNPROCESSABLE_ENTITY
+
+    #print('time', time.time() - t1)
+
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    saved_file = open(outpath, 'rb')
+
+    s3.save_to_bucket(csv_file_name, saved_file)
+
+    #save ref to db
+    ref = FileUpload(filename=csv_file_name, md5_hash=md5_hash,
+            extension=extension, is_original=False)
+
+    ref.save()
+
+    cleanup_temp_file(csv_file_name)
+    cleanup_temp_file(filename)
+
+    #remove environment file
+    try:
+        shutil.rmtree(loffice_environ_path)
+    except:
+        #shrug
+        pass
+
+    return csv_file_name
 
 
 def home(request):
@@ -241,6 +291,22 @@ def upload(request):
             else:
                 cleanup_temp_file(child_name)
                 raise HTTPExceptions.UNPROCESSABLE_ENTITY
+
+
+        if extension in ['xls', 'xlsx', 'ods']:
+            #transform to csv
+            child_name = _create_csv(tempfile_path, new_filename, md5_hash)
+
+            if child_name:
+                cleanup_temp_file(child_name)
+
+                return HttpResponse(child_name)
+
+            else:
+                cleanup_temp_file(child_name)
+                raise HTTPExceptions.UNPROCESSABLE_ENTITY
+
+
 
         if extension == 'pdf':
             #check if is an image pdf or if it has text
