@@ -24,85 +24,6 @@ from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exist
 
 from apps.models import FileUpload
 
-#from apps.tasks import ocr_pdf
-
-#def save_file(file, path='', extension='pdf'):
-    #temp = settings.BASE_DIR + settings.STATIC_URL + str(path)
-
-    #if not os.path.exists(temp):
-        #os.makedirs(temp)
-
-    #filename = file._get_name()
-
-    ##handle non ascii chars in file name
-    #if isinstance(filename, unicode):
-        #try:
-            #filename = unidecode(filename)
-        #except:
-            #filename = re.sub(r'[^\x00-\x7F]+','.', filename)
-
-    #filename = filename.replace("'", '').replace('"', '')
-    #filename = re.sub(r"[\(,\),\s]+", "-", filename)
-
-    #filename_noextension = '.'.join(filename.split('.')[:-1])
-    #rand_key = randomword(5)
-
-    #filename = filename_noextension + "-" + rand_key + '.' + extension
-
-    #fd = open('%s/%s' % (temp, str(filename)), 'wb')
-    #for chunk in file.chunks():
-        #fd.write(chunk)
-    #fd.close()
-
-    #if extension == "pdf":
-        ## get total number of pages 
-        #page_num = count_pages('%s/%s' % (temp, str(filename)))
-
-        ## check if pdf has text.
-        #os.system("pdftotext " + temp + "/" + str(filename))
-        #file_text = filename_noextension + "-" + rand_key + '.txt'
-
-        #txt_path = temp + "/" + file_text
-
-        #if not os.path.exists(txt_path):
-            ##print 'no text'
-            #return 'none-' + str(page_num) + "-" + filename
-        #with open(temp + "/" + file_text, 'rb') as f:
-            #str_data = f.read()
-        #os.remove(temp + "/" + file_text)
-
-        #if len(str_data) < page_num + 10:
-            #return 'false-' + str(page_num) + "-" + filename
-        #return 'true-0-' + filename
-
-    #elif extension == 'docx' or extension == 'doc':
-        ## convert docx to pdf
-        #pdf_name = filename_noextension + "-" + rand_key + '.pdf'
-        #pdf_path = '%s/%s' % (temp, str(pdf_name))
-        #docx_to_pdf('%s/%s' % (temp, str(filename)), pdf_path)
-
-        #return 'true-0-' + pdf_name
-
-    #elif extension == 'xlsx' or extension == 'xls':
-        #csv_name = filename_noextension + "-" + rand_key + '.csv'
-        #csv_path = '%s/%s' % (temp, str(csv_name))
-
-        #csv_from_excel('%s/%s' % (temp, str(filename)), csv_path)
-
-        #return csv_name
-
-    #elif extension == 'csv':
-        #return filename_noextension + "-" + rand_key + '.csv'
-
-    #elif extension == 'epub':
-        #return filename_noextension + "-" + rand_key + '.epub'
-
-
-#def _randomword(length):
-       #return ''.join(random.choice(string.ascii_lowercase + string.digits)\
-               #for i in range(length))
-
-
 def _check_pdf_has_text(new_filename):
     '''Check if if pdf has text or is image pdf.
     Use cli tool "pdftotext" from poppler libs.
@@ -129,8 +50,8 @@ def _check_pdf_has_text(new_filename):
         return False
 
 
-def _create_pdf(tempfile_path, filename, md5_hash):
-    '''create pdf,upload to s3, store ref'''
+def _soffice_process(tempfile_path, filename, md5_hash, process_type):
+    '''create processed file,upload to s3, store ref'''
 
     #libre office requires invidual environs to run multiple instances
     #make empty file named to hash for unique we haz already.
@@ -142,17 +63,17 @@ def _create_pdf(tempfile_path, filename, md5_hash):
         pass
     
     s = filename.split('.')
-    pdf_file_name = '.'.join(s[:-1]) + '.pdf' 
+    child_name = '.'.join(s[:-1]) + '.' + process_type;
     extension = s[-1]
 
-    outpath = os.path.join('/tmp', pdf_file_name)
+    outpath = os.path.join('/tmp', child_name)
 
     #t1 = time.time()
 
     try:
         os.system('/usr/bin/soffice -env:UserInstallation=file://%s \
-            --headless --convert-to pdf %s --outdir %s' \
-            % (loffice_environ_path, tempfile_path, '/tmp'))
+            --headless --convert-to %s %s --outdir %s' \
+            % (loffice_environ_path, process_type, tempfile_path, '/tmp'))
     except:
         raise HTTPExceptions.UNPROCESSABLE_ENTITY
 
@@ -162,15 +83,15 @@ def _create_pdf(tempfile_path, filename, md5_hash):
 
     saved_file = open(outpath, 'rb')
 
-    s3.save_to_bucket(pdf_file_name, saved_file)
+    s3.save_to_bucket(child_name, saved_file)
 
     #save ref to db
-    ref = FileUpload(filename=pdf_file_name, md5_hash=md5_hash,
+    ref = FileUpload(filename=child_name, md5_hash=md5_hash,
             extension=extension, is_original=False)
 
     ref.save()
 
-    cleanup_temp_file(pdf_file_name)
+    cleanup_temp_file(child_name)
     cleanup_temp_file(filename)
 
     #remove environment file
@@ -180,61 +101,7 @@ def _create_pdf(tempfile_path, filename, md5_hash):
         #shrug
         pass
 
-    return pdf_file_name
-
-
-def _create_csv(tempfile_path, filename, md5_hash):
-    '''create csv,upload to s3, store ref'''
-
-    #libre office requires invidual environs to run multiple instances
-    #make empty file named to hash for unique we haz already.
-    loffice_environ_path = os.path.join('/tmp', md5_hash)
-
-    try:
-        os.makedirs(loffice_environ_path)
-    except FileExistsError:
-        pass
-    
-    s = filename.split('.')
-    csv_file_name = '.'.join(s[:-1]) + '.csv' 
-    extension = s[-1]
-
-    outpath = os.path.join('/tmp', csv_file_name)
-
-    #t1 = time.time()
-
-    try:
-        os.system('/usr/bin/soffice -env:UserInstallation=file://%s \
-            --headless --convert-to csv %s --outdir %s' \
-            % (loffice_environ_path, tempfile_path, '/tmp'))
-    except:
-        raise HTTPExceptions.UNPROCESSABLE_ENTITY
-
-    #print('time', time.time() - t1)
-
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
-
-    saved_file = open(outpath, 'rb')
-
-    s3.save_to_bucket(csv_file_name, saved_file)
-
-    #save ref to db
-    ref = FileUpload(filename=csv_file_name, md5_hash=md5_hash,
-            extension=extension, is_original=False)
-
-    ref.save()
-
-    cleanup_temp_file(csv_file_name)
-    cleanup_temp_file(filename)
-
-    #remove environment file
-    try:
-        shutil.rmtree(loffice_environ_path)
-    except:
-        #shrug
-        pass
-
-    return csv_file_name
+    return child_name
 
 
 def home(request):
@@ -278,24 +145,18 @@ def upload(request):
 
             return HttpResponse(existing_name)
 
+        #transform process if needed
+        process_to_file_type = False
 
         if extension in ['doc', 'docx', 'epub', 'odt', 'ott', 'rtf', 'odp', 'ppt', 'pptx']:
-            #transform to pdf
-            child_name = _create_pdf(tempfile_path, new_filename, md5_hash)
-
-            if child_name:
-                cleanup_temp_file(child_name)
-
-                return HttpResponse(child_name)
-
-            else:
-                cleanup_temp_file(child_name)
-                raise HTTPExceptions.UNPROCESSABLE_ENTITY
-
+            process_to_file_type = 'pdf' 
 
         if extension in ['xls', 'xlsx', 'ods']:
-            #transform to csv
-            child_name = _create_csv(tempfile_path, new_filename, md5_hash)
+            process_to_file_type = 'csv' 
+
+        if process_to_file_type:
+            child_name = _soffice_process(
+                    tempfile_path, new_filename, md5_hash, process_to_file_type)
 
             if child_name:
                 cleanup_temp_file(child_name)
@@ -305,7 +166,6 @@ def upload(request):
             else:
                 cleanup_temp_file(child_name)
                 raise HTTPExceptions.UNPROCESSABLE_ENTITY
-
 
 
         if extension == 'pdf':
