@@ -10,6 +10,8 @@ from django.shortcuts import render
 
 from django_http_exceptions import HTTPExceptions
 
+from django.conf import settings
+
 from apps.utils.api_aws import S3
 
 from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
@@ -46,7 +48,7 @@ def upload(request):
 
         basename = basename[:60]
 
-        new_filename = '{0}-{1}.{2}'.format(basename, randomword(5), extension)
+        new_filename = '{0}-{1}.{2}'.format(basename, randword(5), extension)
 
         #save to /tmp
         md5_hash, tempfile_path = save_temp_file(new_filename, file_)
@@ -61,16 +63,15 @@ def upload(request):
 
             s3.save_to_bucket(new_filename, saved_file)
 
-
             cleanup_temp_file(new_filename)
 
-            return JsonResponse({'existing': false, 'filename': new_filename})
+            return JsonResponse({'existing': False, 'filename': new_filename})
 
         else:
 
             cleanup_temp_file(new_filename)
 
-            return JsonResponse({'existing': true, 'filename': existing_name})
+            return JsonResponse({'existing': True, 'filename': existing_name})
 
         return HttpResponse(new_filename)
 

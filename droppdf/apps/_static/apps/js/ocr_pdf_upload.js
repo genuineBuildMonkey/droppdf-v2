@@ -33,36 +33,37 @@
             processData: false,
             contentType: false,
             success : function(response) {
-                if (response && response.file_info) {
+                console.log('A', response)
+                //if (response && response.file_info) {
 
-                    uploaded_file_info = response.file_info;
+                    //uploaded_file_info = response.file_info;
 
-                    $('.button-box').show();
-                    $('#in-progress').hide();
+                    //$('.button-box').show();
+                    //$('#in-progress').hide();
 
-                    $('#progress-bar-inner').css('width', '0%');
+                    //$('#progress-bar-inner').css('width', '0%');
 
-                    upload_in_progress = false;
+                    //upload_in_progress = false;
 
-                    $('#pdf-file').attr('disabled', false);
+                    //$('#pdf-file').attr('disabled', false);
 
-                    $('#drag-instruction').show();
+                    //$('#drag-instruction').show();
 
-                    if (response.file_info.processing_error) {
+                    //if (response.file_info.processing_error) {
 
-                        $('#upload-error')
-                            .text(response.file_info.processing_error)
-                            .show();
+                        //$('#upload-error')
+                            //.text(response.file_info.processing_error)
+                            //.show();
 
-                        $('#run-button')
-                            .addClass('disabled')
-                            .attr('disabled', true)
-                    } else {
-                        $('#run-button')
-                            .removeClass('disabled')
-                            .attr('disabled', false)
-                    }
-                };
+                        //$('#run-button')
+                            //.addClass('disabled')
+                            //.attr('disabled', true)
+                    //} else {
+                        //$('#run-button')
+                            //.removeClass('disabled')
+                            //.attr('disabled', false)
+                    //}
+                //};
             },
             fail: function(error) {
                 var msg;
