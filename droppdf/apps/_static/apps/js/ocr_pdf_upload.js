@@ -33,37 +33,37 @@
             processData: false,
             contentType: false,
             success : function(response) {
-                console.log('A', response)
-                //if (response && response.file_info) {
 
-                    //uploaded_file_info = response.file_info;
+                if (response && response.file_info) {
 
-                    //$('.button-box').show();
-                    //$('#in-progress').hide();
+                    uploaded_file_info = response.file_info;
 
-                    //$('#progress-bar-inner').css('width', '0%');
+                    $('.button-box').show();
+                    $('#in-progress').hide();
 
-                    //upload_in_progress = false;
+                    $('#progress-bar-inner').css('width', '0%');
 
-                    //$('#pdf-file').attr('disabled', false);
+                    upload_in_progress = false;
 
-                    //$('#drag-instruction').show();
+                    $('#pdf-file').attr('disabled', false);
 
-                    //if (response.file_info.processing_error) {
+                    $('#drag-instruction').show();
 
-                        //$('#upload-error')
-                            //.text(response.file_info.processing_error)
-                            //.show();
+                    if (response.file_info.processing_error) {
 
-                        //$('#run-button')
-                            //.addClass('disabled')
-                            //.attr('disabled', true)
-                    //} else {
-                        //$('#run-button')
-                            //.removeClass('disabled')
-                            //.attr('disabled', false)
-                    //}
-                //};
+                        $('#upload-error')
+                            .text(response.file_info.processing_error)
+                            .show();
+
+                        $('#run-button')
+                            .addClass('disabled')
+                            .attr('disabled', true)
+                    } else {
+                        $('#run-button')
+                            .removeClass('disabled')
+                            .attr('disabled', false)
+                    }
+                };
             },
             fail: function(error) {
                 var msg;
@@ -116,6 +116,10 @@
     };
 
     runOCR = function(force) {
+        console.log(uploaded_file_info)
+        return
+
+
         var form =  $('<form action="/ocr/result/" method="POST"></form>');
 
         if (force) {

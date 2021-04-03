@@ -22,12 +22,10 @@ class FileUpload(models.Model):
 
 
 class OCRUpload(models.Model):
-    '''Reference to cloud upload for pdf files to be ocrd'''
+    '''Reference to cloud upload for pdf files to be/have been ocrd'''
     filename = models.CharField(max_length=75)
 
     md5_hash = models.CharField(max_length=64)
-
-    extension = models.CharField(max_length=8)
 
     is_original = models.BooleanField(default=True)
 

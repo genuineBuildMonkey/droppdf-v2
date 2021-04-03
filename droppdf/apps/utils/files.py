@@ -1,6 +1,7 @@
 import os
 import string
 import random
+import subprocess
 
 from apps.models import FileUpload
 
@@ -46,6 +47,44 @@ def check_file_exists(md5_hash):
         return obj.first().filename
 
     return False
+
+
+def check_ocr_file_exists(md5_hash):
+    '''Check database for hash.
+    Return filename if exists, otherwise False'''
+
+    obj = OCRUpload.objects.filter(md5_hash=md5_hash)
+
+    if obj.exists():
+        return obj.first().filename
+
+    return False
+
+
+def check_pdf_has_text(new_filename):
+    '''Check if if pdf has text or is image pdf.
+    Use cli tool "pdftotext" from poppler libs.
+
+    An image pdf will usually show some "text" so discard very short results
+    after replacing newlines and blank spaces etc. in first 1,000 or so chars'''
+    try:
+    
+        cmd = 'pdftotext "/tmp/{0}" -'.format(new_filename)
+
+        rslt = subprocess.check_output(cmd, shell=True)
+
+        rslt = rslt[:1000].decode('utf-8', 'ignore')
+        
+        #remove whitespace, newlines etc.
+        rslt = re.sub(r'\W', '', rslt)
+
+        if len(rslt) < 3:
+            return False
+
+        return True
+
+    except Exception as e:
+        return False
 
 
 def file_record_db(md5_hash, filename):

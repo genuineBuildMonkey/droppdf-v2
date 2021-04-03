@@ -1,7 +1,7 @@
 import re
 import urllib
 import os
-import subprocess
+#import subprocess
 import csv
 import time
 import shutil
@@ -20,34 +20,36 @@ from django_http_exceptions import HTTPExceptions
 from django.conf import settings
 
 from apps.utils.api_aws import S3
-from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists, randword
+
+from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exists,\
+        check_pdf_has_text, randword 
 
 from apps.models import FileUpload
 
-def _check_pdf_has_text(new_filename):
-    '''Check if if pdf has text or is image pdf.
-    Use cli tool "pdftotext" from poppler libs.
+#def _check_pdf_has_text(new_filename):
+    #'''Check if if pdf has text or is image pdf.
+    #Use cli tool "pdftotext" from poppler libs.
 
-    An image pdf will usually show some "text" so discard very short results
-    after replacing newlines and blank spaces etc. in first 1,000 or so chars'''
-    try:
+    #An image pdf will usually show some "text" so discard very short results
+    #after replacing newlines and blank spaces etc. in first 1,000 or so chars'''
+    #try:
     
-        cmd = 'pdftotext "/tmp/{0}" -'.format(new_filename)
+        #cmd = 'pdftotext "/tmp/{0}" -'.format(new_filename)
 
-        rslt = subprocess.check_output(cmd, shell=True)
+        #rslt = subprocess.check_output(cmd, shell=True)
 
-        rslt = rslt[:1000].decode('utf-8', 'ignore')
+        #rslt = rslt[:1000].decode('utf-8', 'ignore')
         
-        #remove whitespace, newlines etc.
-        rslt = re.sub(r'\W', '', rslt)
+        ##remove whitespace, newlines etc.
+        #rslt = re.sub(r'\W', '', rslt)
 
-        if len(rslt) < 3:
-            return False
+        #if len(rslt) < 3:
+            #return False
 
-        return True
+        #return True
 
-    except Exception as e:
-        return False
+    #except Exception as e:
+        #return False
 
 
 def _soffice_process(tempfile_path, filename, md5_hash, process_type):
@@ -170,7 +172,7 @@ def upload(request):
 
         if extension == 'pdf':
             #check if is an image pdf or if it has text
-            if not _check_pdf_has_text(new_filename):
+            if not check_pdf_has_text(new_filename):
                 cleanup_temp_file(new_filename)
                 raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
