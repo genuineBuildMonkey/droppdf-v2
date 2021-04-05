@@ -26,31 +26,6 @@ from apps.utils.files import save_temp_file, cleanup_temp_file, check_file_exist
 
 from apps.models import FileUpload
 
-#def _check_pdf_has_text(new_filename):
-    #'''Check if if pdf has text or is image pdf.
-    #Use cli tool "pdftotext" from poppler libs.
-
-    #An image pdf will usually show some "text" so discard very short results
-    #after replacing newlines and blank spaces etc. in first 1,000 or so chars'''
-    #try:
-    
-        #cmd = 'pdftotext "/tmp/{0}" -'.format(new_filename)
-
-        #rslt = subprocess.check_output(cmd, shell=True)
-
-        #rslt = rslt[:1000].decode('utf-8', 'ignore')
-        
-        ##remove whitespace, newlines etc.
-        #rslt = re.sub(r'\W', '', rslt)
-
-        #if len(rslt) < 3:
-            #return False
-
-        #return True
-
-    #except Exception as e:
-        #return False
-
 
 def _soffice_process(tempfile_path, filename, md5_hash, process_type):
     '''create processed file,upload to s3, store ref'''
@@ -229,3 +204,8 @@ def epub(request, filename):
     url = s3.get_presigned_url(filename)
 
     return render(request, 'epub.html', {'book_url': url})
+
+
+def privacy(request):
+    return render(request, 'privacy.html')
+    #return HttpResponse('privacy')
