@@ -1,3 +1,6 @@
+
+//const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
 (function() {
 
     upload_in_progress = false;
@@ -116,11 +119,10 @@
     };
 
     runOCR = function(force) {
-        console.log(uploaded_file_info)
-        return
+        //console.log(uploaded_file_info)
+        //return
 
-
-        var form =  $('<form action="/ocr/result/" method="POST"></form>');
+        var form =  $('<form action="/ocr/result" method="POST"></form>');
 
         if (force) {
             var force_field = $('<input id="force_flag" name="force_flag" value="true" type="hidden">');
@@ -131,7 +133,10 @@
         var file_info_field = $('<input id="file_info" name="file_info" type="hidden">');
         $(file_info_field).val(file_info);
 
-        $(form).append(file_info_field);
+        //formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        var csrf_token_form = $('<input name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '">');
+
+        $(form).append(file_info_field, csrf_token_form);
 
         $('body').append(form);
 

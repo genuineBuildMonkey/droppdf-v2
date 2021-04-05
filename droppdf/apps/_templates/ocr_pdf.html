@@ -304,11 +304,12 @@
             </div>
 
         </form>
-
     </div>
 
+    {% csrf_token %}
+    
     <script>
-        CSRF_TOKEN = '{{ csrf_token }}';
+        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
 
 </body>

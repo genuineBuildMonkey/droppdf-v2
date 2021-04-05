@@ -6,6 +6,8 @@ from sanitize_filename import sanitize
 
 from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 
+from django.core.exceptions import SuspiciousFileOperation, ValidationError
+
 from django.shortcuts import render
 
 from django_http_exceptions import HTTPExceptions
@@ -92,5 +94,21 @@ def upload(request):
                     'tempfile_path': tempfile_path, 'already_exists': already_exists}}
 
         return JsonResponse(data)
+
+    return HttpResponseNotAllowed(['POST,'])
+
+
+def result(request):
+    if request.method == 'POST':
+        #print(request.form.get('file_info'))
+        file_info = request.POST.get('file_info')
+
+        if not file_info:
+            raise HTTPExceptions.BAD_REQUEST
+
+        print(file_info)
+
+        return HttpResponse('ok')
+        #pass
 
     return HttpResponseNotAllowed(['POST,'])

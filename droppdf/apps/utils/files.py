@@ -3,7 +3,7 @@ import string
 import random
 import subprocess
 
-from apps.models import FileUpload
+from apps.models import FileUpload, OCRUpload
 
 from hashlib import md5
 
