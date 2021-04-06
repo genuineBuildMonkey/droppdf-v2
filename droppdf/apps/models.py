@@ -29,7 +29,7 @@ class OCRUpload(models.Model):
 
     is_original = models.BooleanField(default=True)
 
-    parent = models.ForeignKey('FileUpload', on_delete=models.CASCADE,
+    parent = models.ForeignKey('OCRUpload', on_delete=models.CASCADE,
             null=True, default=None)
 
     is_forced = models.BooleanField(default=False)

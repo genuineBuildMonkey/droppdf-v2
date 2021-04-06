@@ -119,9 +119,6 @@
     };
 
     runOCR = function(force) {
-        //console.log(uploaded_file_info)
-        //return
-
         var form =  $('<form action="/ocr/result" method="POST"></form>');
 
         if (force) {
@@ -130,10 +127,10 @@
         };
 
         var file_info = JSON.stringify(uploaded_file_info);
+
         var file_info_field = $('<input id="file_info" name="file_info" type="hidden">');
         $(file_info_field).val(file_info);
 
-        //formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
         var csrf_token_form = $('<input name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '">');
 
         $(form).append(file_info_field, csrf_token_form);

@@ -1,6 +1,7 @@
 import time
 import re
 import random
+import json
 
 from sanitize_filename import sanitize
 
@@ -20,6 +21,8 @@ from apps.utils.files import save_temp_file, cleanup_temp_file, check_ocr_file_e
         randword, check_pdf_has_text
 
 from apps.models import OCRUpload
+
+from apps.tasks import ocr_pdf
 
 
 def ocr(request):
@@ -91,7 +94,8 @@ def upload(request):
 
         data = {'file_info': {'filename': filename, 'size': file_.size,
                     'new_filename': new_filename, 'processing_error': processing_error,
-                    'tempfile_path': tempfile_path, 'already_exists': already_exists}}
+                    'tempfile_path': tempfile_path, 'already_exists': already_exists,
+                    'md5_hash': md5_hash}}
 
         return JsonResponse(data)
 
@@ -100,15 +104,49 @@ def upload(request):
 
 def result(request):
     if request.method == 'POST':
-        #print(request.form.get('file_info'))
         file_info = request.POST.get('file_info')
 
+        force_flag = request.POST.get('force_flag')
+
         if not file_info:
+            print('a')
             raise HTTPExceptions.BAD_REQUEST
+
+        file_info = json.loads(file_info)
 
         print(file_info)
 
-        return HttpResponse('ok')
-        #pass
+        #make sure parent file reference exists
+        try:
+            parent = OCRUpload.objects.get(md5_hash=file_info.get('md5_hash'))
+        except OCRUpload.DoesNotExist:
+            raise HTTPExceptions.BAD_REQUEST
+
+        if force_flag:
+            child = OCRUpload.objects.filter(parent=parent, is_forced=True)
+        else:
+            child = OCRUpload.objects.filter(parent=parent, is_forced=False)
+
+        #ocr has been performed already
+        if child.exists():
+            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+            child = child.first()
+
+            data = {'existing': True, 'filename': child.filename,
+                    'download_url': get_presigned_download_url(file.filename)}
+
+            return JsonResponse(data)
+
+        #trigger ocr
+        else:
+            ocr_pdf.delay(file.info.get('new_filename'), file_info.get('md5_hash'))
+
+
+            data = {'existing': False, 'filename': child.filename,
+                    'download_url': None}
+
+            return JsonResponse(data)
+
 
     return HttpResponseNotAllowed(['POST,'])

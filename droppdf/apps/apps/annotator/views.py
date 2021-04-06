@@ -208,4 +208,3 @@ def epub(request, filename):
 
 def privacy(request):
     return render(request, 'privacy.html')
-    #return HttpResponse('privacy')
