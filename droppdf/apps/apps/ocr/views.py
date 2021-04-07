@@ -110,8 +110,6 @@ def result(request):
 
         force_flag = request.POST.get('force_flag')
 
-        #md5_hash = file_info.get('md5_hash')
-
         if not file_info:
             raise HTTPExceptions.BAD_REQUEST
 
@@ -119,11 +117,11 @@ def result(request):
 
         md5_hash = file_info.get('md5_hash')
         new_filename = file_info.get('new_filename')
-        #download_url = file_info.get('new_filename')
+
+        processing_error = None
 
         #make sure parent file reference exists
         try:
-            #parent = OCRUpload.objects.get(md5_hash=file_info.get('md5_hash'))
             parent = OCRUpload.objects.filter(md5_hash=md5_hash)
             if parent.exists():
                 parent = parent.first()
@@ -144,20 +142,20 @@ def result(request):
 
             s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
-            data = {'existing': True, 'filename': file_info.get('new_filename'),
-                    'download_url': s3.get_presigned_download_url(child.filename)}
-
-            return JsonResponse(data)
+            file_info['existing'] = True
+            file_info['download_url'] = s3.get_presigned_download_url(child.filename)
 
         #trigger ocr
         else:
             ocr_pdf.delay(new_filename, parent.id, md5_hash, force_flag)
 
+            file_info['existing'] = False
+            file_info['download_url'] = None
 
-            data = {'existing': False, 'filename': file_info.get('new_filename'),
-                    'download_url': None}
+        data = {'file_info':  file_info}
+        data = {'json_file_info':  json.dumps(file_info)}
 
-            return JsonResponse(data)
+        return render(request, 'ocr_pdf_result.html', data)
 
 
     return HttpResponseNotAllowed(['POST,'])

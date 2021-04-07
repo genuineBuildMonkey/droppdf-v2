@@ -181,7 +181,8 @@
     </div>
 
     <script>
-        OCR_FILE_NAME = "{{ file_info.ocr_file_name }}";
+        OCR_FILE_NAME = "{{ file_info.ocr_file_name | safe }}";
+        FILE_INFO = "{{ json_file_info }}";
         PROCESSING_ERROR = '{{ file_info.processing_error | safe}}';
     </script>
 
