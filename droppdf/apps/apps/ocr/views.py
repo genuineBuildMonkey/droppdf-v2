@@ -90,6 +90,8 @@ def upload(request):
         else:
             already_exists = True
 
+            new_filename = existing_name
+
             cleanup_temp_file(new_filename)
 
         data = {'file_info': {'filename': filename, 'size': file_.size,
@@ -108,17 +110,26 @@ def result(request):
 
         force_flag = request.POST.get('force_flag')
 
+        #md5_hash = file_info.get('md5_hash')
+
         if not file_info:
-            print('a')
             raise HTTPExceptions.BAD_REQUEST
 
         file_info = json.loads(file_info)
 
-        print(file_info)
+        md5_hash = file_info.get('md5_hash')
+        new_filename = file_info.get('new_filename')
+        #download_url = file_info.get('new_filename')
 
         #make sure parent file reference exists
         try:
-            parent = OCRUpload.objects.get(md5_hash=file_info.get('md5_hash'))
+            #parent = OCRUpload.objects.get(md5_hash=file_info.get('md5_hash'))
+            parent = OCRUpload.objects.filter(md5_hash=md5_hash)
+            if parent.exists():
+                parent = parent.first()
+            else:
+                raise HTTPExceptions.BAD_REQUEST
+
         except OCRUpload.DoesNotExist:
             raise HTTPExceptions.BAD_REQUEST
 
@@ -129,21 +140,21 @@ def result(request):
 
         #ocr has been performed already
         if child.exists():
-            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
-
             child = child.first()
 
-            data = {'existing': True, 'filename': child.filename,
-                    'download_url': get_presigned_download_url(file.filename)}
+            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+            data = {'existing': True, 'filename': file_info.get('new_filename'),
+                    'download_url': s3.get_presigned_download_url(child.filename)}
 
             return JsonResponse(data)
 
         #trigger ocr
         else:
-            ocr_pdf.delay(file.info.get('new_filename'), file_info.get('md5_hash'))
+            ocr_pdf.delay(new_filename, parent.id, md5_hash, force_flag)
 
 
-            data = {'existing': False, 'filename': child.filename,
+            data = {'existing': False, 'filename': file_info.get('new_filename'),
                     'download_url': None}
 
             return JsonResponse(data)
