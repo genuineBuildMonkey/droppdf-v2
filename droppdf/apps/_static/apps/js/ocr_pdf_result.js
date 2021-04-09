@@ -31,23 +31,6 @@
         $.post('/ocr_pdf_complete', {filename: FILE_INFO.new_filename})
         .done(function(result) {
             _show_complete();
-            //clearInterval(check_interval);
-
-            //stop_time = new Date();
-
-            //var download_link = '/static/drop-pdf/' + FILE_INFO.new_filename
-            //var docdrop_link = '/pdf/' + FILE_INFO.new_filename
-
-            //var time_to_process = ((stop_time - start_time) / 1000).toFixed(2)
-
-            //$('#in-progress').hide();
-            //$('#download-info').show();
-
-            //$('#processing-time').text(time_to_process);
-
-            //$('#file-docdrop-link').attr('href', '/pdf/' + FILE_INFO.new_filename)
-            //$('#file-download-link').attr('href', '/static/drop-pdf/' + FILE_INFO.new_filename)
-
             return;
 
         })
