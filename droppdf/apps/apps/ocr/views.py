@@ -138,6 +138,7 @@ def result(request):
 
         #ocr has been performed already
         if child.exists():
+
             child = child.first()
 
             s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
@@ -153,7 +154,7 @@ def result(request):
             file_info['download_url'] = None
 
         data = {'file_info':  file_info}
-        data = {'json_file_info':  json.dumps(file_info)}
+        data['json_file_info'] = json.dumps(file_info)
 
         return render(request, 'ocr_pdf_result.html', data)
 

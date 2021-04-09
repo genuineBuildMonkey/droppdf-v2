@@ -8,66 +8,65 @@
     var start_time = new Date();
 
 
-    var check_interval = setInterval(function() {
-        $.post('/ocr_pdf_complete', {filename: OCR_FILE_NAME})
-        .done(function(result) {
-            clearInterval(check_interval);
+    //var check_interval = setInterval(function() {
+        //$.post('/ocr_pdf_complete', {filename: OCR_FILE_NAME})
+        //.done(function(result) {
+            //clearInterval(check_interval);
 
-            stop_time = new Date();
+            //stop_time = new Date();
 
-            var download_link = '/static/drop-pdf/' + OCR_FILE_NAME
-            var docdrop_link = '/pdf/' + OCR_FILE_NAME
+            //var download_link = '/static/drop-pdf/' + OCR_FILE_NAME
+            //var docdrop_link = '/pdf/' + OCR_FILE_NAME
 
-            var time_to_process = ((stop_time - start_time) / 1000).toFixed(2)
+            //var time_to_process = ((stop_time - start_time) / 1000).toFixed(2)
 
-            $('#in-progress').hide();
-            $('#download-info').show();
+            //$('#in-progress').hide();
+            //$('#download-info').show();
 
-            $('#processing-time').text(time_to_process);
+            //$('#processing-time').text(time_to_process);
 
-            $('#file-docdrop-link').attr('href', '/pdf/' + OCR_FILE_NAME)
-            $('#file-download-link').attr('href', '/static/drop-pdf/' + OCR_FILE_NAME)
+            //$('#file-docdrop-link').attr('href', '/pdf/' + OCR_FILE_NAME)
+            //$('#file-download-link').attr('href', '/static/drop-pdf/' + OCR_FILE_NAME)
 
-            return;
+            //return;
 
-        })
-        .fail(function(e) {
-        });
+        //})
+        //.fail(function(e) {
+        //});
 
-        c += 1
+        //c += 1
 
-        if (c > max) {
-            clearInterval(check_interval);
-            $('#in-progress').hide();
-            $('#download-info').hide();
-            $('#upload-error').show();
+        //if (c > max) {
+            //clearInterval(check_interval);
+            //$('#in-progress').hide();
+            //$('#download-info').hide();
+            //$('#upload-error').show();
 
-        };
-
-    }, 5000);
+        //};
+    //}, 5000);
 
     $(document).ready(function() {
         $('#time-start').text(start_time.toLocaleTimeString());
 
         var url = window.location.origin;
-        url += '/static/drop-pdf/' + OCR_FILE_NAME;
+        url += '/static/drop-pdf/' + FILE_INFO.new_filename;
 
         $('#download-link')
             .attr('href', url)
             .text(url);
 
         $('#docdrop-link')
-            .attr('href', '/pdf/' + OCR_FILE_NAME)
-            .text(OCR_FILE_NAME);
+            .attr('href', '/pdf/' + FILE_INFO.new_filename)
+            .text(FILE_INFO.new_filename);
 
-        if (PROCESSING_ERROR != 'None' || !PROCESSING_ERROR || PROCESSING_ERROR === '') {
+        if (FILE_INFO.processing_error) {
 
             clearInterval(check_interval);
 
             $('#in-progress').hide();
             $('#download-info').hide();
             $('#upload-error')
-                .text(PROCESSING_ERROR)
+                .text(FILE_INFO.processing_error)
                 .show();
         }
     });

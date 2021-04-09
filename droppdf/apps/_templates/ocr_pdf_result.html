@@ -13,7 +13,7 @@
 
 	<script src="{% static '/vendor/jquery-3.5.1.min.js' %}"></script>
 
-    <script src="{% static '/apps/js/ocr_pdf.js' %}?v=1"></script>
+    <script src="{% static '/apps/js/ocr_pdf_result.js' %}?v=1"></script>
 
     <style>
         body {
@@ -181,9 +181,7 @@
     </div>
 
     <script>
-        OCR_FILE_NAME = "{{ file_info.ocr_file_name | safe }}";
-        FILE_INFO = "{{ json_file_info }}";
-        PROCESSING_ERROR = '{{ file_info.processing_error | safe}}';
+        FILE_INFO = {{ json_file_info | safe }};
     </script>
 
 </body>
