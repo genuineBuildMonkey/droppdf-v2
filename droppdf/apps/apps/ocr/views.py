@@ -9,7 +9,7 @@ from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 
 from django.core.exceptions import SuspiciousFileOperation, ValidationError
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from django_http_exceptions import HTTPExceptions
 
@@ -145,6 +145,7 @@ def result(request):
 
             file_info['existing'] = True
             file_info['download_url'] = s3.get_presigned_download_url(child.filename)
+            file_info['processed_filename'] = child.filename
 
         #trigger ocr
         else:
@@ -152,6 +153,7 @@ def result(request):
 
             file_info['existing'] = False
             file_info['download_url'] = None
+            file_info['processed_filename'] = None
 
         data = {'file_info':  file_info}
         data['json_file_info'] = json.dumps(file_info)
@@ -160,3 +162,11 @@ def result(request):
 
 
     return HttpResponseNotAllowed(['POST,'])
+
+
+def download(request, filename):
+    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+    url = s3.get_presigned_url(filename)
+
+    return redirect(url)
