@@ -7,4 +7,5 @@ urlpatterns = [
         path('ocr/upload', upload, name='ocr_upload'),
         path('ocr/result', result, name='ocr_result'),
         path('ocr/download/<filename>', download, name='ocr_download'),
+        path('ocr/check_complete', check_complete, name='check_complete'),
         ]

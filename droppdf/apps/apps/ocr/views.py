@@ -15,6 +15,8 @@ from django_http_exceptions import HTTPExceptions
 
 from django.conf import settings
 
+from django_celery_results.models import TaskResult 
+
 from apps.utils.api_aws import S3
 
 from apps.utils.files import save_temp_file, cleanup_temp_file, check_ocr_file_exists,\
@@ -23,6 +25,7 @@ from apps.utils.files import save_temp_file, cleanup_temp_file, check_ocr_file_e
 from apps.models import OCRUpload
 
 from apps.tasks import ocr_pdf
+
 
 
 def ocr(request):
@@ -141,21 +144,33 @@ def result(request):
 
             child = child.first()
 
-            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+            #s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
             file_info['existing'] = True
-            file_info['download_url'] = s3.get_presigned_download_url(child.filename)
+            #file_info['download_url'] = s3.get_presigned_download_url(child.filename)
+            file_info['download_url'] = '/ocr/download/' + child.filename
             file_info['processed_filename'] = child.filename
 
         #trigger ocr
         else:
-            ocr_pdf.delay(new_filename, parent.id, md5_hash, force_flag)
+            task_id = ocr_pdf.delay(new_filename, parent.id, md5_hash, force_flag)
+
+            basename = '.'.join(new_filename.split('.')[:-1])
+            if force_flag:
+                processed_filename = basename + '_ocr_force.pdf'
+                #force_flag = True
+            else:
+                processed_filename = basename + '_ocr.pdf'
+                #force_flag = False
 
             file_info['existing'] = False
-            file_info['download_url'] = None
-            file_info['processed_filename'] = None
+            file_info['download_url'] = '/ocr/download/' + processed_filename 
+            file_info['processed_filename'] = processed_filename
+            file_info['task_id'] = str(task_id)
 
-        data = {'file_info':  file_info}
+
+        data = {'file_info': file_info}
+
         data['json_file_info'] = json.dumps(file_info)
 
         return render(request, 'ocr_pdf_result.html', data)
@@ -167,6 +182,35 @@ def result(request):
 def download(request, filename):
     s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
 
-    url = s3.get_presigned_url(filename)
+    if s3.check_file_exists(filename): 
+        url = s3.get_presigned_url(filename)
 
-    return redirect(url)
+        return redirect(url)
+
+    raise HTTPExceptions.NOT_FOUND
+
+
+def check_complete(request):
+    #check if output file exists yet
+    filename = request.POST.get('filename')
+    task_id = request.POST.get('task_id')
+
+    obj = TaskResult.objects.filter(task_id=task_id)
+
+    if obj.exists():
+        obj = obj.first()
+
+        if obj.status == 'SUCCESS':
+            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+
+            download_url = s3.get_presigned_download_url(filename)
+
+            response = {'status': obj.status, 'successful': True, 'download_url': download_url, 'error_detail': None}
+
+        else:
+            response = {'status': obj.status, 'successful': False, 'download_url': None, 'error_detail': obj.result}
+
+        return JsonResponse(response)
+
+    else:
+        raise HTTPExceptions.NOT_FOUND

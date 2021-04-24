@@ -1,5 +1,6 @@
 import io
 import boto3
+import botocore
 from django.conf import settings
 
 class S3():
@@ -94,3 +95,12 @@ class S3():
         s3_obj.download_fileobj(fakefile)
 
         return fakefile
+
+
+    def check_file_exists(self, name):
+        try:
+            self.resource.Bucket(self.bucket).Object(name).get()
+            return True
+        except botocore.exceptions.ClientError:
+            return False
+

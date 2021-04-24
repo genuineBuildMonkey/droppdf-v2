@@ -8,6 +8,8 @@
     uploaded_file_info = null;
 
     _uploadAndCheckText = function() {
+        var percentComplete;
+
         $('.button-box').hide();
         $('#upload-error').hide();
         $('#in-progress').show();
@@ -26,9 +28,25 @@
                 var xhr = new window.XMLHttpRequest();
                 xhr.upload.addEventListener("progress", function(evt) {
                     if (evt.lengthComputable) {
-                        var percentComplete = (evt.loaded / evt.total) * 100;
+                        percentComplete = (evt.loaded / evt.total) * 100;
 
-                        $('#progress-bar-inner').css('width', percentComplete + '%');
+                        $('#progress-bar-inner').css('width', percentComplete / 2 + '%');
+
+                        //processing time on server (guess)
+                        if (percentComplete >= 100) {
+
+                            var prog = setInterval(function() {
+
+                                if ((percentComplete / 2) >= 100) {
+                                    clearInterval(prog);
+                                    return;
+                                }
+
+                                percentComplete += 1;
+                                $('#progress-bar-inner').css('width', percentComplete / 2 + '%');
+
+                            }, 70);
+                        }
                     }
                }, false);
                return xhr;

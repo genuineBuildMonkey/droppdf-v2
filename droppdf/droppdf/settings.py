@@ -161,3 +161,5 @@ AWS_MEDIA_PRIVATE_BUCKET = env('AWS_MEDIA_PRIVATE_BUCKET')
 
 # max number simultaneous ocr process 
 MAX_SIM_OCR_PROCESSES = env('MAX_SIM_OCR_PROCESSES')
+
+CELERY_RESULT_BACKEND = 'django-db'

@@ -180,7 +180,10 @@
 
     </div>
 
+    {% csrf_token %}
+    
     <script>
+        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value;
         FILE_INFO = {{ json_file_info | safe }};
     </script>
 

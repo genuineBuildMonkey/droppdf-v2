@@ -31,15 +31,17 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
         #prevent too many heavy ocr processes from running at once
         current_process_count = len(os.listdir('/tmp/ocr_clients'))
 
-        if current_process_count > int(settings.MAX_SIM_OCR_PROCESSES):
-            raise MaxProcessesExceeded()
+        print('--', current_process_count, int(settings.MAX_SIM_OCR_PROCESSES), '---')
+
+        if current_process_count >= int(settings.MAX_SIM_OCR_PROCESSES):
+            raise MaxProcessesExceededError()
 
         #add to current process count with file
         try:
             f = open(lockfile, 'x')
             f.close()
         except FileExistsError:
-            raise FileInProcess()
+            raise FileInProcessError()
 
         input_path = os.path.join('/tmp', filename)
 
@@ -85,7 +87,6 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
                 is_original=False, is_forced=force_flag, parent_id=parent_id)
 
         ref.save()
-
 
         #remove from process count 
         os.remove(lockfile)
