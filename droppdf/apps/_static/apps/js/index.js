@@ -1,11 +1,4 @@
 var dropzone;
-var addedFile = 0;
-//var fileObj;
-var filename = "";
-//var progress = 0;
-//var ocr_progress;
-//var ocr_progress_status = 0;
-var estimated_time = 0;
 
 var type = "";
 
@@ -117,31 +110,21 @@ $(document).ready(function(){
                 extension = extension.toLowerCase();
             
                 if (valid_extensions.includes('.' + extension)) {
+                    type = extension;
 
-                    type = extension
+                    var md5 = SparkMD5.hashBinary(file)
 
-                    if (addedFile == 0) {
-                        addedFile = 1;
-                    }
-                    else {
-                        //this.removeFile(file);
-                        var html = '<div>Invalid filetype</div>';
-                        displayError(html);
-                        return false;
-                    }
+                    console.log('x', md5)
+
                 }
                 else {
                     var html = '<div>Invalid filetype</div>';
                     displayError(html);
-
                     return false;
-                    //this.removeFile(file);
                 }
             });
 
             this.on("success", function(file, filename) {
-                console.log('a', type)
-
                 $('[data-dz-uploadprogress]').css('width', '100%');
 
                 if (type == 'pdf') {

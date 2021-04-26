@@ -1,4 +1,5 @@
 import os
+import re
 import string
 import random
 import subprocess
@@ -84,6 +85,7 @@ def check_pdf_has_text(new_filename):
         return True
 
     except Exception as e:
+        print('\n', e)
         return False
 
 
