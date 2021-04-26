@@ -111,11 +111,6 @@ $(document).ready(function(){
             
                 if (valid_extensions.includes('.' + extension)) {
                     type = extension;
-
-                    var md5 = SparkMD5.hashBinary(file)
-
-                    console.log('x', md5)
-
                 }
                 else {
                     var html = '<div>Invalid filetype</div>';
