@@ -4,4 +4,5 @@ from .views import *
 
 urlpatterns = [
         path('fingerprinter/', fingerprinter, name='fingerprinter'),
+        path('fingerprinter/upload/', fingerprinter_upload, name='fingerprinter_upload'),
         ]
