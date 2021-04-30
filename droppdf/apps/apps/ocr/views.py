@@ -27,7 +27,6 @@ from apps.models import OCRUpload
 from apps.tasks import ocr_pdf
 
 
-
 def ocr(request):
     return render(request, 'ocr_pdf.html', {})
 

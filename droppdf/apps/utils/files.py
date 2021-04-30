@@ -9,10 +9,13 @@ from apps.models import FileUpload, OCRUpload
 from hashlib import md5
 
 
-def save_temp_file(new_filename, file_):
+def save_temp_file(new_filename, file_, subdir=None):
     '''Save file to disk in /tmp directory.
     returns tuple(md5 hash, temp file path)'''
-    tempfile_path = os.path.join('/tmp', new_filename)
+    if subdir:
+        tempfile_path = os.path.join('/tmp', subdir, new_filename)
+    else:
+        tempfile_path = os.path.join('/tmp', new_filename)
 
     hash_ = md5()
 

@@ -95,7 +95,14 @@
 
         $('#param-form').append(csrf_token_form);
 
-        $('#param-form').submit();
+        var formData = new FormData($('#param-form')[0]);
+
+        console.log(formData);
+
+        //formData.append('pdf-file', $('#pdf-file')[0].files[0]);
+        //formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
+
+        //$('#param-form').submit();
     };
 
     window.uploadPDF = _uploadPDF;
