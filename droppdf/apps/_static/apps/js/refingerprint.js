@@ -97,12 +97,23 @@
 
         var formData = new FormData($('#param-form')[0]);
 
-        console.log(formData);
-
-        //formData.append('pdf-file', $('#pdf-file')[0].files[0]);
-        //formData.append('csrfmiddlewaretoken', CSRF_TOKEN);
-
-        //$('#param-form').submit();
+        $.ajax({
+            url : '/fingerprinter/upload/',
+            type : 'POST',
+            data : formData,
+            processData: false,
+            contentType: false,
+            success : function(response) {
+                if (response && response.directory) {
+                    //console.log(directory);
+                };
+            },
+            fail: function(error) {
+                return _showError('Upload failed');
+            },
+            statusCode: {
+            },
+        });
     };
 
     window.uploadPDF = _uploadPDF;

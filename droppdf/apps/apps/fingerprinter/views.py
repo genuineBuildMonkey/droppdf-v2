@@ -9,11 +9,15 @@ import binascii
 
 from django.shortcuts import render
 
+from django.http import JsonResponse
+
 from django_http_exceptions import HTTPExceptions
 
 from sanitize_filename import sanitize
 
 from apps.tasks import refingerprint_pdf
+
+from apps.utils.files import save_temp_file, randword
 
 
 def fingerprinter(request):
@@ -26,6 +30,8 @@ def fingerprinter_upload(request):
     pdf_file = request.FILES.get('pdf-file')
     copy_count = request.POST.get('copy-count', 1)
     suffix = request.POST.get('file-suffix', '')
+
+    print(pdf_file, copy_count, suffix);
     
     try:
         copy_count = int(copy_count)
@@ -42,7 +48,7 @@ def fingerprinter_upload(request):
             raise HTTPExceptions.NOT_ACCEPTABLE #Error code 406
 
         #make save directory 
-        rand_path = _randomword(9)
+        rand_path = randword(9)
         save_path = os.path.join('/tmp/', rand_path)
         os.makedirs(save_path)
 
@@ -53,12 +59,16 @@ def fingerprinter_upload(request):
 
         save_temp_file(filename, pdf_file, subdir=rand_path)
 
-        data = {'in_process': True, 'directory': rand_path, 'filename': filename}
+        data = {'directory': rand_path, 'filename': filename}
 
         return JsonResponse(data)
 
     else:
         raise Http404('file not provided')
+
+
+def fingerprinter_result():
+    pass
 
 
 def fingerprinter_download(request, directory_name, filename):

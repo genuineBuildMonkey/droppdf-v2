@@ -1,6 +1,7 @@
 from celery import shared_task
 import subprocess
 import os
+import time
 
 from hashlib import md5
 
@@ -111,15 +112,17 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
 
 
 @shared_task
-def refingerprint_pdf(filename, copy_count, suffix):
+def refingerprint_pdf(filename, directory, copy_count, suffix):
 
     #content = PdfReader(io.BytesIO(file_content))
-    content = PdfReader('/tmp' + filename)
+    base_file_path = os.path.join('/tmp/', directory, filename)
+
+    content = PdfReader(base_file_path)
 
     #make save directory 
-    rand_path = randword(9)
-    fingerprint_dir = os.path.join('/tmp/', rand_path)
-    os.makedirs(fingerprint_dir)
+    #rand_path = randword(9)
+    #fingerprint_dir = os.path.join('/tmp/', rand_path)
+    #os.makedirs(fingerprint_dir)
 
     if content.ID is None:
         file_id = 'No ID'
@@ -134,54 +137,33 @@ def refingerprint_pdf(filename, copy_count, suffix):
     except UnicodeDecodeError:
         file_id = 'Unreadable'
 
-    print(file_info, copy_count)
+    processed_files = []
 
     for copy_index in range(copy_count):
         try:
-            print(copy_index)
-
             if suffix and suffix != '':
                 save_filename = filename + '-' + suffix + '-' + str(copy_index + 1) + extension
             else:
                 save_filename = filename + '-' + str(copy_index + 1) + extension
 
-            file_path = os.path.join(fingerprint_dir, save_filename)
+            file_path = os.path.join('/tmp', directory, save_filename)
 
-            print(file_path)
-
-            #static_link = os.path.join('/pdf', save_filename)
             download_link = os.path.join('/fingerprinter/download/', save_filename)
 
-            #print('x', download_link)
-
-            #try:
-            content = PdfReader(io.BytesIO(file_content))
-            #except Exception as e:
-                #print(e)
-
+            content = PdfReader(base_file_path)
 
             #add some random meta data
             content.Info.randomMetaData = binascii.b2a_hex(os.urandom(20)).upper()
 
-            print('AAA', filename)
             filename = filename.strip().encode('utf-8')
 
             #change id to random id
-            md = hashlib.md5()
+            md = hashlib.md5(filename)
 
-            #md = hashlib.md5(filename)
-            #md = _randomword(5)
-
-            print('d')
             md.update(str(time.time()))
             md.update(os.urandom(10))
-            print('xx')
 
             new_id = _randomword(10)
-
-            print(new_id)
-
-            print(md.upper)
 
             new_id = md.hexdigest().upper()
 
@@ -191,33 +173,17 @@ def refingerprint_pdf(filename, copy_count, suffix):
             while len(new_id) < 32:
                 new_id += random.choice('0123456789ABCDEF')
 
-            print('c')
-
             content.ID = [new_id, new_id]
-
-            print('e', file_path)
 
             PdfWriter(file_path, trailer=content).write()
 
-            print('aaasd')
+            #shutil.copy(file_path, annotation_path)
 
-            shutil.copy(file_path, annotation_path)
-
-            print('f')
-
-            download_link = '/fingerprinter/download/' + save_filename 
+            #download_link = '/fingerprinter/download/' + save_filename 
 
             copy_info = {'filename': save_filename,
                     'download_link': download_link, 'id': content.ID[0]}
 
         except Exception as e:
-            #exc_type, exc_value, exc_tb = sys.exc_info()
-            #tb = traceback.TracebackException(exc_type, exc_value, exc_tb)
-            #print(''.join(tb.format_exception_only()))
-            print(e)
-
-        #print(copy_info)
-
-        #processed_files.append(copy_info)
-        print('ok')
+            pass
 
