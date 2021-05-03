@@ -15,7 +15,7 @@ from django_http_exceptions import HTTPExceptions
 
 from django.conf import settings
 
-from django_celery_results.models import TaskResult 
+from django_celery_results.models import TaskResult
 
 from apps.utils.api_aws import S3
 

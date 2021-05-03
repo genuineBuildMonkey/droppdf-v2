@@ -2,6 +2,8 @@ from celery import shared_task
 import subprocess
 import os
 import time
+import json
+import shutil
 import binascii
 
 from hashlib import md5
@@ -113,77 +115,95 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
 
 
 @shared_task
+def delete_refingerprint(base_dir):
+    '''clean up fingerprinted files'''
+    time.sleep(1 * 60)
+
+    shutil.rmtree(base_dir)
+
+
+@shared_task
 def refingerprint_pdf(filename, directory, copy_count, suffix):
-
-    #content = PdfReader(io.BytesIO(file_content))
-    base_file_path = os.path.join('/tmp/', directory, filename)
-
-    content = PdfReader(base_file_path)
-
-    #make save directory 
-    #rand_path = randword(9)
-    #fingerprint_dir = os.path.join('/tmp/', rand_path)
-    #os.makedirs(fingerprint_dir)
-
-    if content.ID is None:
-        file_id = 'No ID'
-    else:
-        file_id = str(content.ID[0]).replace('<', '').replace('>', '')\
-                .replace('(', '').replace(')', '')
-
-
-    #bad file_ids can contain strange characters
     try:
-        file_id.encode('utf-8').strip()
-    except UnicodeDecodeError:
-        file_id = 'Unreadable'
 
-    processed_files = []
+        base_dir = os.path.join('/tmp/', directory)
 
-    for copy_index in range(copy_count):
+        base_file_path = os.path.join(base_dir, filename)
 
-        #try:
-        if suffix and suffix != '':
-            save_filename = filename + '-' + suffix + '-' + str(copy_index + 1) + '.pdf'
-        else:
-            save_filename = filename + '-' + str(copy_index + 1) + '.pdf'
-
-        file_path = os.path.join('/tmp', directory, save_filename)
-
-        download_link = os.path.join('/fingerprinter/download/', save_filename)
+        #file size kb
+        file_size = round(os.path.getsize(base_file_path) / 1024)
 
         content = PdfReader(base_file_path)
 
-        #add some random meta data
-        content.Info.randomMetaData = binascii.b2a_hex(os.urandom(20)).upper()
+        if content.ID is None:
+            file_id = 'No ID'
+        else:
+            file_id = str(content.ID[0]).replace('<', '').replace('>', '')\
+                    .replace('(', '').replace(')', '')
 
-        _filename = filename.strip().encode('utf-8')
+        #bad file_ids can contain strange characters
+        try:
+            file_id.encode('utf-8').strip()
+        except UnicodeDecodeError:
+            file_id = 'Unreadable'
 
-        #change id to random id
-        md = md5(_filename)
+        processed_files = []
 
-        md.update(str(time.time()).encode('utf-8'))
-        md.update(os.urandom(10))
+        for copy_index in range(copy_count):
 
-        new_id = md.hexdigest().upper()
+            if suffix and suffix != '':
+                save_filename = filename + '-' + suffix + '-' + str(copy_index + 1) + '.pdf'
+            else:
+                save_filename = filename + '-' + str(copy_index + 1) + '.pdf'
 
-        #keep length 32
-        new_id = new_id[0:32]
+            file_path = os.path.join('/tmp', directory, save_filename)
 
-        while len(new_id) < 32:
-            new_id += random.choice('0123456789ABCDEF')
+            download_link = os.path.join('/fingerprinter/download/', save_filename)
 
-        content.ID = [new_id, new_id]
+            content = PdfReader(base_file_path)
 
-        PdfWriter(file_path, trailer=content).write()
+            #add some random meta data
+            content.Info.randomMetaData = binascii.b2a_hex(os.urandom(20)).upper()
 
-            #shutil.copy(file_path, annotation_path)
+            _filename = filename.strip().encode('utf-8')
 
-            #download_link = '/fingerprinter/download/' + save_filename 
+            #change id to random id
+            md = md5(_filename)
 
-        copy_info = {'filename': save_filename,
-                'download_link': download_link, 'id': content.ID[0]}
+            md.update(str(time.time()).encode('utf-8'))
+            md.update(os.urandom(10))
 
-        #except Exception as e:
-            #pass
+            new_id = md.hexdigest().upper()
 
+            #keep length 32
+            new_id = new_id[0:32]
+
+            while len(new_id) < 32:
+                new_id += random.choice('0123456789ABCDEF')
+
+            content.ID = [new_id, new_id]
+
+            PdfWriter(file_path, trailer=content).write()
+
+            copy_info = {'filename': save_filename,
+                    'download_link': download_link, 'id': content.ID[0]}
+
+            processed_files.append(copy_info)
+
+        #save copy of info in file directory 
+        out_file = open(os.path.join(base_dir, 'file_info.json'), 'w')
+
+        file_info = {'filename': filename, 'size': file_size, 'id': file_id,
+            'directory_name': base_dir, 'processed_files': processed_files}
+
+        json.dump(file_info, out_file, indent=4)
+      
+        out_file.close()
+
+        #delete generated files
+        delete_refingerprint.delay(base_dir)
+
+    except Exception as e:
+        delete_refingerprint.delay(base_dir)
+
+        raise(e)

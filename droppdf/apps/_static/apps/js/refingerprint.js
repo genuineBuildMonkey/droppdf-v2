@@ -80,7 +80,7 @@
     function _uploadPDF() {
         _hideError();
 
-        var csrf_token_form = $('<input name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '">');
+        var csrf_token_form = $('<input id="csrf_form_token" name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '">');
 
         var file = $('#pdf-file').prop('files')[0];
 
@@ -103,10 +103,43 @@
             data : formData,
             processData: false,
             contentType: false,
-            success : function(response) {
-                if (response && response.directory) {
-                    console.log(response.directory);
-                };
+            success: function(response) {
+                if (response && response.directory && response.task_id) {
+                    $('#csrf_form_token').hide();
+                    $('#upload-button').hide();
+                    $('#in-progress').show();
+
+                    var try_count = 0;
+                    //check if processing is complete
+                    var intvl = setInterval(function() {
+                        if (try_count > 20) {
+                            clearInterval(intvl);
+                            _showError('File processing failed to complete. Please try a smaller file');
+                        };
+
+                        $.ajax({
+                            url: '/fingerprinter/check_complete/',
+                            type: 'POST',
+                            data: {task_id: response.task_id, csrfmiddlewaretoken: CSRF_TOKEN},
+                            success: function(rslt) {
+                                if (rslt && rslt.status == 'SUCCESS') {
+                                    clearInterval(intvl);
+                                    window.location.href = '/fingerprinter/result/?dir=' + response.directory
+                                }
+                            },
+                            fail: function(e) {
+                                clearInterval(intvl);
+                                _showError('Processing failed. Check file and try again.');
+                            },
+                        });
+
+                        try_count += 1;
+
+                    }, 10000);
+
+                } else {
+                    _showError('Problem processing file. Please check name and file type and try again.');
+                }
             },
             fail: function(error) {
                 _showError('Upload failed');

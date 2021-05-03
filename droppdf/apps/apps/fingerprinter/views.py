@@ -13,6 +13,8 @@ from django.http import JsonResponse
 
 from django_http_exceptions import HTTPExceptions
 
+from django_celery_results.models import TaskResult
+
 from sanitize_filename import sanitize
 
 from apps.tasks import refingerprint_pdf
@@ -31,8 +33,6 @@ def fingerprinter_upload(request):
     copy_count = request.POST.get('copy-count', 1)
     suffix = request.POST.get('file-suffix', '')
 
-    print(pdf_file, copy_count, suffix);
-    
     try:
         copy_count = int(copy_count)
     except:
@@ -70,7 +70,32 @@ def fingerprinter_upload(request):
         raise Http404('file not provided')
 
 
-def fingerprinter_result():
+def fingerprinter_check_complete(request):
+    '''check if refingerprint task has completed'''
+
+    task_id = request.POST.get('task_id')
+
+    if not task_id:
+        raise Http404()
+
+    obj = TaskResult.objects.filter(task_id=task_id)
+
+    if obj.exists():
+        obj = obj.first()
+
+        if obj.status == 'SUCCESS':
+            response = {'status': obj.status}
+
+        else:
+            response = {'status': 'FAIL'}
+
+    else:
+        response = {'status': 'INCOMPLETE'}
+
+    return JsonResponse(response)
+
+
+def fingerprinter_result(request):
     pass
 
 
