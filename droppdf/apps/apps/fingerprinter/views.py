@@ -59,7 +59,10 @@ def fingerprinter_upload(request):
 
         save_temp_file(filename, pdf_file, subdir=rand_path)
 
-        data = {'directory': rand_path, 'filename': filename}
+        #trigger fingerprint task
+        task_id = refingerprint_pdf.delay(filename, rand_path, copy_count, suffix)
+
+        data = {'directory': rand_path, 'filename': filename, 'task_id': str(task_id)}
 
         return JsonResponse(data)
 

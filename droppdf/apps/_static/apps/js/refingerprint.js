@@ -105,13 +105,19 @@
             contentType: false,
             success : function(response) {
                 if (response && response.directory) {
-                    //console.log(directory);
+                    console.log(response.directory);
                 };
             },
             fail: function(error) {
-                return _showError('Upload failed');
+                _showError('Upload failed');
             },
             statusCode: {
+                404: function() {
+                    _showError('Upload failed');
+                },
+                406: function() {
+                   _showError('file not provided');
+                },
             },
         });
     };

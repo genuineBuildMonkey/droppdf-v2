@@ -2,6 +2,7 @@ from celery import shared_task
 import subprocess
 import os
 import time
+import binascii
 
 from hashlib import md5
 
@@ -140,50 +141,49 @@ def refingerprint_pdf(filename, directory, copy_count, suffix):
     processed_files = []
 
     for copy_index in range(copy_count):
-        try:
-            if suffix and suffix != '':
-                save_filename = filename + '-' + suffix + '-' + str(copy_index + 1) + extension
-            else:
-                save_filename = filename + '-' + str(copy_index + 1) + extension
 
-            file_path = os.path.join('/tmp', directory, save_filename)
+        #try:
+        if suffix and suffix != '':
+            save_filename = filename + '-' + suffix + '-' + str(copy_index + 1) + '.pdf'
+        else:
+            save_filename = filename + '-' + str(copy_index + 1) + '.pdf'
 
-            download_link = os.path.join('/fingerprinter/download/', save_filename)
+        file_path = os.path.join('/tmp', directory, save_filename)
 
-            content = PdfReader(base_file_path)
+        download_link = os.path.join('/fingerprinter/download/', save_filename)
 
-            #add some random meta data
-            content.Info.randomMetaData = binascii.b2a_hex(os.urandom(20)).upper()
+        content = PdfReader(base_file_path)
 
-            filename = filename.strip().encode('utf-8')
+        #add some random meta data
+        content.Info.randomMetaData = binascii.b2a_hex(os.urandom(20)).upper()
 
-            #change id to random id
-            md = hashlib.md5(filename)
+        _filename = filename.strip().encode('utf-8')
 
-            md.update(str(time.time()))
-            md.update(os.urandom(10))
+        #change id to random id
+        md = md5(_filename)
 
-            new_id = _randomword(10)
+        md.update(str(time.time()).encode('utf-8'))
+        md.update(os.urandom(10))
 
-            new_id = md.hexdigest().upper()
+        new_id = md.hexdigest().upper()
 
-            #keep length 32
-            new_id = new_id[0:32]
+        #keep length 32
+        new_id = new_id[0:32]
 
-            while len(new_id) < 32:
-                new_id += random.choice('0123456789ABCDEF')
+        while len(new_id) < 32:
+            new_id += random.choice('0123456789ABCDEF')
 
-            content.ID = [new_id, new_id]
+        content.ID = [new_id, new_id]
 
-            PdfWriter(file_path, trailer=content).write()
+        PdfWriter(file_path, trailer=content).write()
 
             #shutil.copy(file_path, annotation_path)
 
             #download_link = '/fingerprinter/download/' + save_filename 
 
-            copy_info = {'filename': save_filename,
-                    'download_link': download_link, 'id': content.ID[0]}
+        copy_info = {'filename': save_filename,
+                'download_link': download_link, 'id': content.ID[0]}
 
-        except Exception as e:
-            pass
+        #except Exception as e:
+            #pass
 
