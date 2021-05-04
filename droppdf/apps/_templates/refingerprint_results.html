@@ -124,7 +124,7 @@
 
     <div class="main-content">
         <div>
-            You submitted: "{{ file_info.filename }}" {{ file_info.size }} bytes with fingerprint <code>{{ file_info.id }}</code> for refingerprinting.
+            You submitted: "{{ filename }}" {{ size }} kilobytes with fingerprint <code>{{ id }}</code> for refingerprinting.
         </div>
 
         <br>
@@ -143,28 +143,19 @@
                 <tr>
                     <td>{{ copy.filename }}</td>
                     <td>
-                        <a href="javascript:void(0)" 
-                        onclick="downloadFile('{{ copy.download_path }}')">
+                        <a href="{{ copy.download_link }}">
                             <i class="fa fa-download"></i>
                         </a>
                     </td>
-                    <!--<td><a href="/pdf/{{ copy.docdrop_link }}/" target="_blank">-->
-                            <!--<i class="fa fa-file-pdf-o"></i>-->
-                        <!--</a>-->
-                    <!--</td>-->
-                    <td><code>{{ copy.id }}</code></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
         <br>
 
-        <a href="javascript:void(0)" 
-        onclick="downloadZip('{{ file_info.directory_name }}')">
-        </a>
-
         <div class="button" style="width: 10em"
-        onclick="downloadZip('{{ file_info.directory_name }}', '{{ archive_name }}')">
+        onclick="downloadZip()">
             <i class="fa fa-file-archive-o"></i>
             Download Zipfile
         </div>
@@ -172,21 +163,11 @@
     </div>
 
     <script>
-        function downloadFile(path) {
-            var p = path.split('/');
-            var directory_name = p[0]; 
-            var filename = p[1]; 
-            var url = '/fingerprinter/download/'; 
-            url += directory_name + '/'
-            url += filename + '/'
+        var DIRECTORY = "{ directory_name }";
 
-            window.open(url, "_blank")
-        };
-
-        function downloadZip(directory_name, archive_name) {
+        function downloadZip() {
             var url = '/fingerprinter/compressed/';
-            url += directory_name;
-            url += '/?archive_name=' + encodeURI(archive_name);
+            url += DIRECTORY;
 
             window.open(url, "_blank")
         };

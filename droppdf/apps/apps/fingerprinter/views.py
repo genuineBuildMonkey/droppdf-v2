@@ -5,11 +5,12 @@ import random
 import hashlib
 import time
 import string
+import json
 import binascii
 
 from django.shortcuts import render
 
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from django_http_exceptions import HTTPExceptions
 
@@ -96,7 +97,28 @@ def fingerprinter_check_complete(request):
 
 
 def fingerprinter_result(request):
-    pass
+    directory = request.GET.get('dir') 
+
+    if not directory:
+        raise Http404()
+
+    base_directory = os.path.join('/tmp', directory)
+
+    if not os.path.exists(base_directory):
+        raise Http404()
+
+    file_info = os.path.join(base_directory, 'file_info.json')
+
+    if not os.path.exists(file_info):
+        raise Http404()
+
+    with open(file_info, 'r') as j:
+        data = json.loads(j.read())
+
+    print(data)
+
+    return render(request, 'refingerprint_results.html', data)
+
 
 
 def fingerprinter_download(request, directory_name, filename):

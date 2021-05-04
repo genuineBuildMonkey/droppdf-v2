@@ -117,7 +117,7 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
 @shared_task
 def delete_refingerprint(base_dir):
     '''clean up fingerprinted files'''
-    time.sleep(1 * 60)
+    time.sleep(10 * 60)
 
     shutil.rmtree(base_dir)
 
@@ -194,7 +194,7 @@ def refingerprint_pdf(filename, directory, copy_count, suffix):
         out_file = open(os.path.join(base_dir, 'file_info.json'), 'w')
 
         file_info = {'filename': filename, 'size': file_size, 'id': file_id,
-            'directory_name': base_dir, 'processed_files': processed_files}
+            'directory_name': directory, 'processed_files': processed_files}
 
         json.dump(file_info, out_file, indent=4)
       
