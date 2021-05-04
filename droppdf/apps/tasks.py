@@ -158,7 +158,7 @@ def refingerprint_pdf(filename, directory, copy_count, suffix):
 
             file_path = os.path.join('/tmp', directory, save_filename)
 
-            download_link = os.path.join('/fingerprinter/download/', save_filename)
+            download_link = '/fingerprinter/download/%s?file=%s' % (directory, save_filename)
 
             content = PdfReader(base_file_path)
 

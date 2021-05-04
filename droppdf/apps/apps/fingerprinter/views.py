@@ -6,11 +6,13 @@ import hashlib
 import time
 import string
 import json
+import shutil
 import binascii
 
 from django.shortcuts import render
 
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse, \
+        HttpResponseNotFound
 
 from django_http_exceptions import HTTPExceptions
 
@@ -115,22 +117,26 @@ def fingerprinter_result(request):
     with open(file_info, 'r') as j:
         data = json.loads(j.read())
 
-    print(data)
-
     return render(request, 'refingerprint_results.html', data)
 
 
+def fingerprinter_download(request, directory):
+    file_name = request.GET.get("file")
 
-def fingerprinter_download(request, directory_name, filename):
-    file_location = os.path.join(settings.BASE_DIR, 'static/fingerprints',
-            directory_name, filename)
+    if not file_name:
+        raise Http404()
+
+    file_location = os.path.join('/tmp', directory, file_name)
+
+    if not os.path.exists(file_location):
+        raise Http404()
 
     try:
-        with open(file_location, 'r') as f:
+        with open(file_location, 'rb') as f:
            file_data = f.read()
 
         response = HttpResponse(file_data, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        response['Content-Disposition'] = 'attachment; filename="%s"' % file_name
 
     except IOError:
         response = HttpResponseNotFound('<h1>File does not exist</h1>')
@@ -138,13 +144,16 @@ def fingerprinter_download(request, directory_name, filename):
     return response
 
 
-def fingerprinter_compressed(request, directory_name):
-    directory_path = os.path.join(settings.BASE_DIR, 'static/fingerprints',
-            directory_name)
+def fingerprinter_compressed(request, directory):
+    directory_path = os.path.join('/tmp', directory)
 
-    archive_name = request.GET["archive_name"]
+    #remove original and json leaving only refingerprints
+    for file_ in os.listdir(directory_path):
+        ext = file_.split('.')[-1]
+        if ext != 'pdf':
+            os.remove(os.path.join(directory_path, file_))
 
-    tmp_name = '/tmp/%s' % directory_name
+    tmp_name = '/tmp/%s' % directory
     tmp_zip = tmp_name + '.zip'
 
     #create zipfile
@@ -155,7 +164,7 @@ def fingerprinter_compressed(request, directory_name):
            file_data = f.read()
 
         response = HttpResponse(file_data, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="%s.zip"' % archive_name
+        response['Content-Disposition'] = 'attachment; filename="%s.zip"' % directory
         os.remove(tmp_zip)
 
     except IOError:

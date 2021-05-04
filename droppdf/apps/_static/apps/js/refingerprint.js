@@ -112,7 +112,7 @@
                     var try_count = 0;
                     //check if processing is complete
                     var intvl = setInterval(function() {
-                        if (try_count > 20) {
+                        if (try_count > 40) {
                             clearInterval(intvl);
                             _showError('File processing failed to complete. Please try a smaller file');
                         };
@@ -135,7 +135,7 @@
 
                         try_count += 1;
 
-                    }, 10000);
+                    }, 5000);
 
                 } else {
                     _showError('Problem processing file. Please check name and file type and try again.');
