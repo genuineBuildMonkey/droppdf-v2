@@ -17,6 +17,9 @@ class FileUpload(models.Model):
 
     updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.filename
+
     class Meta:
         db_table = 'apps_fileupload'
 
@@ -37,6 +40,9 @@ class OCRUpload(models.Model):
     created = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.filename
 
     class Meta:
         db_table = 'apps_ocr_upload'

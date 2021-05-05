@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import FileUpload, OCRUpload
+
+admin.site.register(FileUpload)
+admin.site.register(OCRUpload)
