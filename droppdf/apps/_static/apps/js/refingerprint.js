@@ -80,7 +80,7 @@
     function _uploadPDF() {
         _hideError();
 
-        var csrf_token_form = $('<input id="csrf_form_token" name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '">');
+        var csrf_token_form = $('<input id="csrf_form_token" name="csrfmiddlewaretoken" value="' + CSRF_TOKEN + '" style="visibility: hidden">');
 
         var file = $('#pdf-file').prop('files')[0];
 
