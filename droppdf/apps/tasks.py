@@ -38,8 +38,6 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
         #prevent too many heavy ocr processes from running at once
         current_process_count = len(os.listdir('/tmp/ocr_clients'))
 
-        print('--', current_process_count, int(settings.MAX_SIM_OCR_PROCESSES), '---')
-
         if current_process_count >= int(settings.MAX_SIM_OCR_PROCESSES):
             raise MaxProcessesExceededError()
 
@@ -53,7 +51,7 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
         input_path = os.path.join('/tmp', filename)
 
         #download file and save 
-        s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+        s3 = S3(settings.AWS_OCR_BUCKET)
 
         file_obj = s3.download_fileobj_from_bucket(filename)
         #file_obj.save(input_path)
@@ -102,8 +100,6 @@ def ocr_pdf(filename, parent_id, md5_hash, force_flag):
         cleanup_temp_file(processed_filename)
 
     except Exception as e:
-        print(e)
-
         try:
             os.remove(os.path.join('/tmp/ocr_clients', md5_hash))
             cleanup_temp_file(filename)

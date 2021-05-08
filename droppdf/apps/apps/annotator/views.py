@@ -54,9 +54,7 @@ def _soffice_process(tempfile_path, filename, md5_hash, process_type):
     except:
         raise HTTPExceptions.UNPROCESSABLE_ENTITY
 
-    #print('time', time.time() - t1)
-
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+    s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
     saved_file = open(outpath, 'rb')
 
@@ -153,7 +151,7 @@ def upload(request):
 
 
         #upload to cloud
-        s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+        s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
         saved_file = open(tempfile_path, 'rb')
 
@@ -173,7 +171,7 @@ def upload(request):
 
 
 def pdf(request, filename):
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+    s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
     url = s3.get_presigned_url(filename)
 
@@ -181,7 +179,7 @@ def pdf(request, filename):
 
 
 def csv_view(request, filename):
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+    s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
     file_obj = s3.download_fileobj_from_bucket(filename)
 
@@ -199,7 +197,7 @@ def csv_view(request, filename):
 
 
 def epub(request, filename):
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+    s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
     url = s3.get_presigned_url(filename)
 

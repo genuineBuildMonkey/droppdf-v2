@@ -77,7 +77,7 @@ def upload(request):
             already_exists = False
 
             #upload original to S3
-            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+            s3 = S3(settings.AWS_OCR_BUCKET)
 
             saved_file = open(tempfile_path, 'rb')
 
@@ -143,10 +143,7 @@ def result(request):
 
             child = child.first()
 
-            #s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
-
             file_info['existing'] = True
-            #file_info['download_url'] = s3.get_presigned_download_url(child.filename)
             file_info['download_url'] = '/ocr/download/' + child.filename
             file_info['processed_filename'] = child.filename
 
@@ -157,10 +154,8 @@ def result(request):
             basename = '.'.join(new_filename.split('.')[:-1])
             if force_flag:
                 processed_filename = basename + '_ocr_force.pdf'
-                #force_flag = True
             else:
                 processed_filename = basename + '_ocr.pdf'
-                #force_flag = False
 
             file_info['existing'] = False
             file_info['download_url'] = '/ocr/download/' + processed_filename 
@@ -179,7 +174,7 @@ def result(request):
 
 
 def download(request, filename):
-    s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+    s3 = S3(settings.AWS_OCR_BUCKET)
 
     if s3.check_file_exists(filename): 
         url = s3.get_presigned_url(filename)
@@ -200,7 +195,7 @@ def check_complete(request):
         obj = obj.first()
 
         if obj.status == 'SUCCESS':
-            s3 = S3(settings.AWS_MEDIA_PRIVATE_BUCKET)
+            s3 = S3(settings.AWS_OCR_BUCKET)
 
             download_url = s3.get_presigned_download_url(filename)
 
