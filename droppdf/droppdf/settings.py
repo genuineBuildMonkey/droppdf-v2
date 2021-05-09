@@ -145,10 +145,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = BASE_DIR / 'apps/_static'
+STATIC_ROOT = BASE_DIR / 'static'
 
 STATICFILES_DIRS = (
-    #(BASE_DIR / 'apps/_static'),
+    (BASE_DIR / 'apps/_static'),
 )
 
 MIGRATION_MODULES = {'apps': 'apps._migrations'}
@@ -166,4 +166,6 @@ AWS_FINGERPRINTER_BUCKET = env('AWS_FINGERPRINTER_BUCKET')
 # max number simultaneous ocr process 
 MAX_SIM_OCR_PROCESSES = env('MAX_SIM_OCR_PROCESSES')
 
+#celery
 CELERY_RESULT_BACKEND = 'django-db'
+BROKER_URL = env('BROKER_URL')

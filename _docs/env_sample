@@ -26,3 +26,6 @@ AWS_CUSTOM_DOMAIN='https://s3.us-central-1.wasabisys.com'
 
 #How many simultanous OCR process to allow at one time 
 MAX_SIM_OCR_PROCESSES=3
+
+#rabbitmq broker url
+BROKER_URL='pyamqp://guest@localhost//'
