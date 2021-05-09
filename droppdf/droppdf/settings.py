@@ -145,7 +145,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = BASE_DIR / 'apps/static'
+STATIC_ROOT = BASE_DIR / 'apps/_static'
 
 STATICFILES_DIRS = (
     #(BASE_DIR / 'apps/_static'),
