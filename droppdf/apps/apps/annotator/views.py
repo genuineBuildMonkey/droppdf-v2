@@ -171,7 +171,13 @@ def upload(request):
 
 
 def pdf(request, filename):
-    s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
+
+    #file is in ocr bucket
+    if request.GET.get('src') == 'ocr':
+        s3 = S3(settings.AWS_OCR_BUCKET)
+
+    else:
+        s3 = S3(settings.AWS_ANNOTATIONS_BUCKET)
 
     url = s3.get_presigned_url(filename)
 

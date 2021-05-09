@@ -19,7 +19,7 @@
 
         $('#processing-time').text(time_to_process);
 
-        $('#docdrop-link').attr('href', '/pdf/' + FILE_INFO.processed_filename)
+        $('#docdrop-link').attr('href', '/pdf/' + FILE_INFO.processed_filename + '?src=ocr')
 
         $('#file-download-link').attr('href', FILE_INFO.download_url)
     };
@@ -87,7 +87,7 @@
             .text(url);
 
         $('#docdrop-link')
-            .attr('href', '/pdf/' + FILE_INFO.new_filename)
+            .attr('href', '/pdf/' + FILE_INFO.new_filename + '?src=ocr')
             .text(FILE_INFO.new_filename);
 
         /* ocr previously performed */
