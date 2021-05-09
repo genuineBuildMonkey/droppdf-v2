@@ -145,8 +145,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = BASE_DIR / 'apps/static'
+
 STATICFILES_DIRS = (
-    (BASE_DIR / 'apps/_static'),
+    #(BASE_DIR / 'apps/_static'),
 )
 
 MIGRATION_MODULES = {'apps': 'apps._migrations'}
